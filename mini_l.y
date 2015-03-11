@@ -15,6 +15,14 @@ using namespace std;
 
 void yyerror (const char* msg);
 
+/* need symbol table. can implement using a map struct */
+map <string, int> symbol_table;
+vector <string> ident_list;
+int label_ctr, temp_ctr, pred_ctr  = 0;
+
+bool errorFound;
+list<string> milcode;
+
 string newTemp();
 string newPred ();
 string genExprCode ( string dst, string src1, string src2, string op );
@@ -24,14 +32,6 @@ extern int currPos;
 extern int yylex();
 extern FILE * yyin;
 extern char* yytext;
-
-/* need symbol table. can implement using a map struct */
-map <string, int> symbol_table;
-vector <string> ident_list;
-int label_ctr, temp_ctr, pred_ctr  = 0;
-
-string milCode;
-list<string> milcode;
 
 enum IDENT_TYPE
 {
@@ -122,7 +122,12 @@ S:          program
             ;
 
 program:    PROGRAM IDENT SEMICOLON block END_PROGRAM 
-	{ printf("program -> PROGRAM IDENT SEMICOLON block END_PROGRAM\n"); cout << milCode; }
+	{ printf("program -> PROGRAM IDENT SEMICOLON block END_PROGRAM\n"); /*cout << milCode;*/
+	  list <string>::iterator it;
+	  
+	  for ( it = milcode.begin(); it != milcode.end(); ++it)
+			cout << *it << endl;
+	}
 	| error IDENT SEMICOLON block END_PROGRAM
 	| PROGRAM IDENT SEMICOLON block error
 	| PROGRAM error SEMICOLON block END_PROGRAM
@@ -133,19 +138,19 @@ block:    decl_loop bBEGIN_PROGRAM stmt_loop
 		  | decl_loop error stmt_loop
           ;
           
-bBEGIN_PROGRAM:		BEGIN_PROGRAM { milCode += " : START\n"; }
+bBEGIN_PROGRAM:		BEGIN_PROGRAM { milcode.push_back(" : START"); }
 					;
 
 decl_loop:  declaration SEMICOLON decl_loop
 	    | declaration SEMICOLON 
 	    | declaration error 
-	    
-            ;
+        ;
+        
 stmt_loop:  statement SEMICOLON stmt_loop { $$.code = $1.code; }
 	    | statement SEMICOLON { $$.code = $1.code; }
 	    | statement error stmt_loop 
 	    | statement error
-            ;
+        ;
 
 declaration: ident_loop COLON array_decl INTEGER
 { 	/* check if identifer in symbol table
@@ -169,8 +174,8 @@ declaration: ident_loop COLON array_decl INTEGER
 			
 			// generate milcode
 			// TODO
-			milCode = milCode + "\t" + ".[] _" +  ident
-					  + ", " + arrSize + "\n";
+			string newCode = "\t.[] _" +  ident + ", " + arrSize;
+			milcode.push_back (newCode);
 		}
 		
 		// if ident isn't in symbol table and ident is an int
@@ -179,7 +184,8 @@ declaration: ident_loop COLON array_decl INTEGER
 		{
 			symbol_table[ident] = TYPE_INT;
 			// TODO
-			milCode = milCode +  "\t" + ". _" + ident + "\n";
+			string newCode =  "\t. _" + ident;
+			milcode.push_back (newCode);
 		}
 			
 	}
@@ -226,14 +232,14 @@ array_decl: 	/*empty */ { $$.type = TYPE_INT; }
 		| ARRAY L_BRACKET NUMBER error {}
   		;
 
-/* var assign var_branch {$$.code = "hi\n"} */
+/* var assign var_branch {$$.code = "hi"} */
 statement:	var assign expr 
 			{
 				string varName = $1.name;
 				string exprName = $3.name;
 				
-				string newCode = "= " + varName + ", " + exprName + "\n";
-				milCode = milCode + newCode;
+				string newCode = "\t= " + varName + ", " + exprName;
+				milcode.push_back (newCode);
 			} 
 			| var assign bool_expr QUESTION expr COLON expr
          	| IF bool_expr THEN if_body ENDIF {}
@@ -308,45 +314,72 @@ relation_expr:	NOT expr comp expr
 					
 					string bool_op = $3.name;
 					
-					string predName = newPred();
-					strcpy ($$.name, predName.c_str());
-			
-					//genExprCode (dest, src1, src2, OP)
-					string tempCode = genExprCode (predName, expr1_name, expr2_name, bool_op);
-					milCode = milCode + tempCode;
+					string predName1 = newPred();
 					
-					// milcode.push_back (tempCode);
+					// first, we generate code for "p_n = expr comp expr"
+					//genExprCode (dest, src1, src2, OP)
+					string newCode = genExprCode (predName1, expr1_name, expr2_name, bool_op);
+					milcode.push_back (newCode);
+					
+					// then, we generate code for "p_(n+1) = NOT p_n"
+					string predName2 = newPred();
+					newCode = "\t! " + predName2 + predName1;
+					milcode.push_back (newCode);
+					
+					strcpy ($$.name, predName2.c_str());
 					
 				}
 				| NOT TRUE
 				{
-					// return false
-					// ! dest, src
+					// p contains the value of the bool_expr
+					// p <- false <- NOT true
 					string predName = newPred();
 					strcpy ($$.name, predName.c_str());
 					
+					// ! dest, src
+					string newCode = "\t! " + predName + "true";
+					milcode.push_back (newCode);
 					
-					// p = NOT true = false
-					//$$.name = p ( p contains false)
-					milCode = milCode + "true";
 				}
 				| NOT FALSE
 				{	
-					// return true
+					// p contains the value of the bool_expr
+					// p <- true <- NOT false
+					string predName = newPred();
+					strcpy ($$.name, predName.c_str());
+					
 					// ! dest, src
+					string newCode = "\t! " + predName + "false";
+					milcode.push_back (newCode);
+					
 				}
 				| NOT L_PAREN bool_expr R_PAREN 
 				{
+					string boolexpr_name = $3.name;
+					string predName = newPred();
+					strcpy ($$.name, predName.c_str());
+					
+					string newCode = "\t! " + predName + boolexpr_name;
+					milcode.push_back (newCode);
 				}
 				| expr comp expr 
 				{
+					string expr1_name = $1.name;
+					string expr2_name = $3.name;
 					
-				
+					string bool_op = $2.name;
+					
+					string predName = newPred();
+					strcpy ($$.name, predName.c_str());
+					
+					string newCode = genExprCode(predName, expr1_name, expr2_name, bool_op);
+					milcode.push_back (newCode);
+					
 				}
-				| TRUE {}
-				| FALSE {}
-				| L_PAREN bool_expr R_PAREN {}
-				| error {printf("Syntax Error: Invalid condition\n");}
+				| TRUE { string temp = "true"; strcpy($$.name, temp.c_str()); }
+				| FALSE { string temp = "false"; strcpy ($$.name, temp.c_str()); }
+				| L_PAREN bool_expr R_PAREN { strcpy ($$.name, $$.name); }
+				| error { printf("Syntax Error: Invalid condition\n"); }
 				;
 
 comp:	EQ { string temp = "=="; strcpy($$.name, temp.c_str()); }
@@ -368,8 +401,8 @@ expr:	mult_expr { $$.name = $1.name; }
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string tempCode = genExprCode (tempName, multExprName, exprName, "+");
-			milCode = milCode + tempCode;
+			string newCode = genExprCode (tempName, multExprName, exprName, "+");
+			milcode.push_back (newCode);
 		}
 		| mult_expr SUB expr 
 		{
@@ -379,9 +412,8 @@ expr:	mult_expr { $$.name = $1.name; }
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string tempCode = genExprCode (tempName, multExprName, exprName, "-");
-			milCode = milCode + tempCode;
-
+			string newCode = genExprCode (tempName, multExprName, exprName, "-");
+			milcode.push_back (newCode);
 		}
 		;
 */
@@ -396,8 +428,8 @@ expr:	mult_expr { strcpy($$.name, $1.name); }
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string tempCode = genExprCode (tempName, exprName, multExprName, "+");
-			milCode = milCode + tempCode;
+			string newCode = genExprCode (tempName, exprName, multExprName, "+");
+			milcode.push_back (newCode);
 		}
 		| expr SUB mult_expr 
 		{
@@ -408,9 +440,8 @@ expr:	mult_expr { strcpy($$.name, $1.name); }
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string tempCode = genExprCode (tempName, exprName, multExprName, "-");
-			milCode = milCode + tempCode;
-
+			string newCode = genExprCode (tempName, exprName, multExprName, "-");
+			milcode.push_back (newCode);
 		}
 		;
 
@@ -422,8 +453,8 @@ mult_expr:	mult_expr MULT term
 			strcpy($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string tempCode = genExprCode(tempName, mult_exprName, termName, "*");
-			milCode = milCode + tempCode;
+			string newCode = genExprCode(tempName, mult_exprName, termName, "*");
+			milcode.push_back (newCode);
 			
 		}
 		| mult_expr DIV term
@@ -434,8 +465,8 @@ mult_expr:	mult_expr MULT term
 			strcpy($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string tempCode = genExprCode(tempName, mult_exprName, termName, "/");
-			milCode = milCode + tempCode;
+			string newCode = genExprCode(tempName, mult_exprName, termName, "/");
+			milcode.push_back (newCode);
 		}
 		| mult_expr MOD term 
 		{
@@ -445,8 +476,8 @@ mult_expr:	mult_expr MULT term
 			strcpy($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string tempCode = genExprCode(tempName, mult_exprName, termName, "%");
-			milCode = milCode + tempCode;
+			string newCode = genExprCode(tempName, mult_exprName, termName, "%");
+			milcode.push_back (newCode);
 		}
 		| term { strcpy($$.name, $1.name); }
 		;
@@ -458,8 +489,9 @@ term:	SUB var /* same thing as "dst = 0 - var" */
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string tempCode = genExprCode (tempName, "0", varName, "-");
-			milCode = milCode + tempCode;
+			string newCode = genExprCode (tempName, "0", varName, "-");
+			// milCode = milCode + tempCode;
+			milcode.push_back (newCode);
 		}
 		| SUB NUMBER 
 		{
@@ -468,8 +500,9 @@ term:	SUB var /* same thing as "dst = 0 - var" */
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string tempCode = genExprCode (tempName, "0", varName, "-");
-			milCode = milCode + tempCode;
+			string newCode = genExprCode (tempName, "0", varName, "-");
+			//milCode = milCode + tempCode;
+			milcode.push_back (newCode);
 		}
 		| SUB L_PAREN expr R_PAREN 
 		{
@@ -478,8 +511,9 @@ term:	SUB var /* same thing as "dst = 0 - var" */
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string tempCode = genExprCode (tempName, "0", varName, "-");
-			milCode = milCode + tempCode;
+			string newCode = genExprCode (tempName, "0", varName, "-");
+			// milCode = milCode + tempCode;
+			milcode.push_back (newCode);
 		}
 		| var { strcpy($$.name, $1.name); }
 		| NUMBER { strcpy($$.name, $1); }
@@ -494,10 +528,10 @@ term:	SUB var /* same thing as "dst = 0 - var" */
 */
 string genExprCode ( string dst, string src1, string src2, string op )
 {
-	string exprCode = op + " " + 
+	string exprCode = "\t" + op + " " + 
 					  dst + ", " + 
 					  src1 + ", " +
-					  src2 + "\n";
+					  src2;
 	return exprCode;
 }
 
