@@ -1,0 +1,16 @@
+
+program primes;
+
+n : integer;
+x: integer;
+y: integer;
+sqrt_n : integer;
+sqrt_n: integer;
+
+
+beginprogram	
+
+
+y := 6 + 2 - 3 % 3 * 4;
+endprogram
+

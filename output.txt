@@ -1,0 +1,251 @@
+ident_loop -> IDENT
+declaration -> ident_loop COLON array_decl INTEGER
+ident_loop -> IDENT
+array_decl -> ARRAY [ NUMBER ] OF 
+declaration -> ident_loop COLON array_decl INTEGER
+ident_loop -> IDENT
+ident_loop -> IDENT COMMA ident_loop
+declaration -> ident_loop COLON array_decl INTEGER
+ident_loop -> IDENT
+ident_loop -> IDENT COMMA ident_loop
+declaration -> ident_loop COLON array_decl INTEGER
+decl_loop -> declaration;
+var -> IDENT 
+var_loop -> var
+statement -> READ var
+var -> IDENT 
+assign -> ASSIGN
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+statement -> var := expr
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+comp -> GT
+var -> IDENT 
+term -> var
+var -> IDENT 
+term -> var
+mult_expr -> term
+mult_expr -> term DIV mult_expr
+expr -> mult_expr
+relation_expr -> expr COMP expr
+relation_and_expr -> relation_expr
+bool_expr -> relation_expr
+var -> IDENT 
+assign -> ASSIGN
+var -> IDENT 
+term -> var
+mult_expr -> term
+var -> IDENT 
+term -> var
+var -> IDENT 
+term -> var
+mult_expr -> term
+mult_expr -> term DIV mult_expr
+expr -> mult_expr
+expr -> mult_expr PLUS mult_expr
+term -> ( expr )
+term -> NUMBER
+mult_expr -> term
+mult_expr -> term DIV mult_expr
+expr -> mult_expr
+statement -> var := expr
+stmt_loop -> statement;
+statement -> WHILE bool_expr BEGINLOOP stmt_loop ENDLOOP
+var -> IDENT 
+assign -> ASSIGN
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+statement -> var := expr
+var -> IDENT 
+assign -> ASSIGN
+term -> NUMBER
+mult_expr -> term
+expr -> mult_expr
+statement -> var := expr
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+comp -> LTE
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+relation_expr -> expr COMP expr
+relation_and_expr -> relation_expr
+bool_expr -> relation_expr
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+var -> IDENT [ expr ]
+assign -> ASSIGN
+term -> NUMBER
+mult_expr -> term
+expr -> mult_expr
+statement -> var := expr
+var -> IDENT 
+assign -> ASSIGN
+var -> IDENT 
+term -> var
+mult_expr -> term
+term -> NUMBER
+mult_expr -> term
+expr -> mult_expr
+expr -> mult_expr PLUS mult_expr
+statement -> var := expr
+stmt_loop -> statement;
+statement -> WHILE bool_expr BEGINLOOP stmt_loop ENDLOOP
+var -> IDENT 
+assign -> ASSIGN
+term -> NUMBER
+mult_expr -> term
+expr -> mult_expr
+statement -> var := expr
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+comp -> LTE
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+relation_expr -> expr COMP expr
+relation_and_expr -> relation_expr
+bool_expr -> relation_expr
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+var -> IDENT [ expr ]
+term -> var
+mult_expr -> term
+expr -> mult_expr
+comp -> EQ
+term -> NUMBER
+mult_expr -> term
+expr -> mult_expr
+relation_expr -> expr COMP expr
+relation_and_expr -> relation_expr
+bool_expr -> relation_expr
+var -> IDENT 
+assign -> ASSIGN
+var -> IDENT 
+term -> var
+mult_expr -> term
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+expr -> mult_expr PLUS mult_expr
+statement -> var := expr
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+comp -> LTE
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+relation_expr -> expr COMP expr
+relation_and_expr -> relation_expr
+bool_expr -> relation_expr
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+var -> IDENT [ expr ]
+assign -> ASSIGN
+term -> NUMBER
+mult_expr -> term
+expr -> mult_expr
+statement -> var := expr
+var -> IDENT 
+assign -> ASSIGN
+var -> IDENT 
+term -> var
+mult_expr -> term
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+expr -> mult_expr PLUS mult_expr
+statement -> var := expr
+stmt_loop -> statement;
+statement -> WHILE bool_expr BEGINLOOP stmt_loop ENDLOOP
+stmt_loop -> statement;
+statement -> IF bool_expr THEN if_body ENDIF
+var -> IDENT 
+assign -> ASSIGN
+var -> IDENT 
+term -> var
+mult_expr -> term
+term -> NUMBER
+mult_expr -> term
+expr -> mult_expr
+expr -> mult_expr PLUS mult_expr
+statement -> var := expr
+stmt_loop -> statement;
+statement -> WHILE bool_expr BEGINLOOP stmt_loop ENDLOOP
+var -> IDENT 
+assign -> ASSIGN
+term -> NUMBER
+mult_expr -> term
+expr -> mult_expr
+statement -> var := expr
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+comp -> LTE
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+relation_expr -> expr COMP expr
+relation_and_expr -> relation_expr
+bool_expr -> relation_expr
+var -> IDENT 
+term -> var
+mult_expr -> term
+expr -> mult_expr
+var -> IDENT [ expr ]
+term -> var
+mult_expr -> term
+expr -> mult_expr
+comp -> EQ
+term -> NUMBER
+mult_expr -> term
+expr -> mult_expr
+relation_expr -> expr COMP expr
+relation_and_expr -> relation_expr
+bool_expr -> relation_expr
+var -> IDENT 
+var_loop -> var
+statement -> WRITE var
+stmt_loop -> statement;
+statement -> IF bool_expr THEN if_body ENDIF
+var -> IDENT 
+assign -> ASSIGN
+var -> IDENT 
+term -> var
+mult_expr -> term
+term -> NUMBER
+mult_expr -> term
+expr -> mult_expr
+expr -> mult_expr PLUS mult_expr
+statement -> var := expr
+stmt_loop -> statement;
+statement -> WHILE bool_expr BEGINLOOP stmt_loop ENDLOOP
+stmt_loop -> statement;
+block -> decl_loop BEGIN_PROGRAM stmt_loop
+program -> PROGRAM IDENT SEMICOLON block END_PROGRAM
