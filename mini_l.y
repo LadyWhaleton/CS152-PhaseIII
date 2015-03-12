@@ -10,6 +10,8 @@
 #include <sstream>
 #include <list>
 
+// if there's a segfault, might be because we pass in a c.string into
+// a function whose parameters are strings
 
 using namespace std;
 
@@ -20,7 +22,8 @@ map <string, int> symbol_table;
 vector <string> ident_list;
 int label_ctr, temp_ctr, pred_ctr  = 0;
 
-bool errorFound;
+bool errorFound = false;
+bool isArrayAccess = false;
 list<string> milcode;
 
 string newTemp();
