@@ -11,6 +11,7 @@ sqrt_n: integer;
 beginprogram	
 
 
-y := 6 + 2 - 3 % 3 * 4;
+n := 3 + 2 == x ? 1 : 2;
+
 endprogram
 

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <map>
+#include <stack>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -20,15 +21,20 @@ void yyerror (const char* msg);
 /* need symbol table. can implement using a map struct */
 map <string, int> symbol_table;
 vector <string> ident_list;
+vector<string> leader_list;
 int label_ctr, temp_ctr, pred_ctr  = 0;
 
 bool errorFound = false;
 bool isArrayAccess = false;
+bool boolval = false;
+int booleanOp = 0;
 list<string> milcode;
 
 string newTemp();
 string newPred ();
+string newLabel ();
 string genExprCode ( string dst, string src1, string src2, string op );
+bool compare (int lhs, int rhs, int boolOp);
 
 extern int currLine;
 extern int currPos; 
@@ -59,6 +65,7 @@ enum IDENT_TYPE
 		//char* name;
 		char name [255];
 		int type;
+		int value;
 		char* size;
 		char* code;
 	};
@@ -126,10 +133,15 @@ S:          program
 
 program:    PROGRAM IDENT SEMICOLON block END_PROGRAM 
 	{ printf("program -> PROGRAM IDENT SEMICOLON block END_PROGRAM\n"); /*cout << milCode;*/
-	  list <string>::iterator it;
 	  
-	  for ( it = milcode.begin(); it != milcode.end(); ++it)
-			cout << *it << endl;
+	  if (!errorFound)
+	  {
+			list <string>::iterator it;
+	  
+			for ( it = milcode.begin(); it != milcode.end(); ++it)
+				cout << *it << endl;
+			cout << " : EndLabel\n";
+	  }
 	}
 	| error IDENT SEMICOLON block END_PROGRAM
 	| PROGRAM IDENT SEMICOLON block error
@@ -216,7 +228,7 @@ iIDENT:		IDENT
 				// otherwise, why are you redeclaring ident??!?! >:(	
 				else
 				{
-					// TODO:
+					errorFound = true;
 					cout << "Error at line " << currLine 
 						 << ": redeclaration of '" << ident << "'\n";
 				}	
@@ -239,12 +251,41 @@ statement:	var assign expr
 			{
 				string varName = $1.name;
 				string exprName = $3.name;
+				//if variable is not in the symbol table, then this will
+				//immediately create the variable and assign value, which
+				//is bad.
+				symbol_table[varName] = $3.value;
 				
 				string newCode = "\t= " + varName + ", " + exprName;
 				milcode.push_back (newCode);
 			} 
 			| var assign bool_expr QUESTION expr COLON expr
-         	| IF bool_expr THEN if_body ENDIF {}
+			{
+				string varName = $1.name;
+				string boolexprName = $3.name;
+				
+				string expr1Name = $5.name;
+				string expr2Name = $7.name;
+				
+				if(boolval) {
+					string newCode = "\t= " + varName + ", " + expr1Name;
+					milcode.push_back (newCode);
+				}
+				else {
+					string newCode = "\t= " + varName + ", " + expr2Name;
+					milcode.push_back (newCode);
+				}
+			}
+         	| IF bool_expr THEN if_body ENDIF
+         	{
+				string boolExprName = $2.name;
+				if(!boolval) {
+					string labelName = newLabel();
+					leader_list.push_back(labelName);
+					string newCode = " := " + labelName;
+					milcode.push_back(newCode);
+				}				
+         	}
          	| WHILE bool_expr BEGINLOOP stmt_loop ENDLOOP {}
         	| DO BEGINLOOP stmt_loop ENDLOOP WHILE bool_expr {}
          	| READ var_loop {}
@@ -274,8 +315,13 @@ var:    IDENT
 			
 			if ( it == symbol_table.end() )
 			{
+				errorFound = true;
 				cout << "Error at line " << currLine << ": '" << ident
 					 << "' was not declared\n";
+			}
+			else {
+				int temp = symbol_table[ident];
+				$$.value = temp;
 			}
 			
 			strcpy ($$.name, $1);
@@ -310,6 +356,8 @@ relation_and_expr: 	relation_expr {}
 
 relation_expr:	NOT expr comp expr 
 				{
+					// need to implement comparator stuff
+					
 					string predName1 = newPred();
 					
 					// first, we generate code for "p_n = expr comp expr"
@@ -332,8 +380,9 @@ relation_expr:	NOT expr comp expr
 					string predName = newPred();
 					strcpy ($$.name, predName.c_str());
 					
+					boolval = false;
 					// ! dest, src
-					string newCode = "\t! " + predName + "true";
+					string newCode = "\t! " + predName + ", true";
 					milcode.push_back (newCode);
 					
 				}
@@ -344,13 +393,16 @@ relation_expr:	NOT expr comp expr
 					string predName = newPred();
 					strcpy ($$.name, predName.c_str());
 					
+					boolval = true;
 					// ! dest, src
-					string newCode = "\t! " + predName + "false";
+					string newCode = "\t! " + predName + ", false";
 					milcode.push_back (newCode);
 					
 				}
 				| NOT L_PAREN bool_expr R_PAREN 
 				{
+					// need to implement comparator stuff
+				
 					string boolexpr_name = $3.name;
 					string predName = newPred();
 					strcpy ($$.name, predName.c_str());
@@ -360,62 +412,47 @@ relation_expr:	NOT expr comp expr
 				}
 				| expr comp expr 
 				{
+					// need to implement comparator stuff
+					
 					string bool_op = $2.name;
 					
 					string predName = newPred();
 					strcpy ($$.name, predName.c_str());
 					
+					boolval = compare($1.value, $3.value, booleanOp);
+
 					string newCode = genExprCode(predName, $1.name, $3.name, bool_op);
 					milcode.push_back (newCode);	
 				}
-				| TRUE { string temp = "true"; strcpy($$.name, temp.c_str()); }
-				| FALSE { string temp = "false"; strcpy ($$.name, temp.c_str()); }
+				| TRUE { string temp = "true"; strcpy($$.name, temp.c_str()); boolval = true;}
+				| FALSE { string temp = "false"; strcpy ($$.name, temp.c_str()); boolval = false;}
 				| L_PAREN bool_expr R_PAREN { strcpy ($$.name, $$.name); }
 				| error { printf("Syntax Error: Invalid condition\n"); }
 				;
 
-comp:	EQ { string temp = "=="; strcpy($$.name, temp.c_str()); }
-     	| NEQ { string temp = "!="; strcpy($$.name, temp.c_str()); }
-    	| LT { string temp = "<"; strcpy($$.name, temp.c_str()); }
-     	| GT { string temp = ">"; strcpy($$.name, temp.c_str()); }
-     	| LTE { string temp = ">="; strcpy ($$.name, temp.c_str()); }
-     	| GTE { string temp = "<="; strcpy ($$.name, temp.c_str()); }
+comp:	EQ { string temp = "=="; strcpy($$.name, temp.c_str()); booleanOp = 0; }
+     	| NEQ { string temp = "!="; strcpy($$.name, temp.c_str()); booleanOp = 1; }
+    	| LT { string temp = "<"; strcpy($$.name, temp.c_str()); booleanOp = 2; }
+     	| GT { string temp = ">"; strcpy($$.name, temp.c_str()); booleanOp = 3; }
+     	| LTE { string temp = ">="; strcpy ($$.name, temp.c_str()); booleanOp = 4; }
+     	| GTE { string temp = "<="; strcpy ($$.name, temp.c_str()); booleanOp = 5; }
      	;
 
-/*
-// This does mult first, but subtraction then addition
-expr:	mult_expr { $$.name = $1.name; }
-		| mult_expr PLUS expr
-		{
-			string tempName = newTemp();
-			strcpy ($$.name, tempName.c_str());
-			
-			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, $1.name, $3.name, "+");
-			milcode.push_back (newCode);
-		}
-		| mult_expr SUB expr 
-		{
-			string tempName = newTemp();
-			strcpy ($$.name, tempName.c_str());
-			
-			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, $1.name, $3.name, "-");
-			milcode.push_back (newCode);
-		}
-		;
-*/
-
 // This one does mult, add, mult, sub
-expr:	mult_expr { strcpy($$.name, $1.name); }
+expr:	mult_expr
+		{
+			strcpy($$.name, $1.name); 
+			$$.value = $1.value;
+		}
 		| expr PLUS mult_expr
 		{
 			string tempName = newTemp();
 			strcpy ($$.name, tempName.c_str());
-			
+			$$.value = $1.value + $3.value;
 			//genExprCode (dest, src1, src2, OP)
 			string newCode = genExprCode (tempName, $1.name, $3.name, "+");
 			milcode.push_back (newCode);
+			
 		}
 		| expr SUB mult_expr 
 		{
@@ -456,7 +493,10 @@ mult_expr:	mult_expr MULT term
 			string newCode = genExprCode(tempName, $1.name, $3.name, "%");
 			milcode.push_back (newCode);
 		}
-		| term { strcpy($$.name, $1.name); }
+		| term
+		{ strcpy($$.name, $1.name); 
+			$$.value = $1.value;
+		}
 		;
 
 term:	SUB var /* same thing as "dst = 0 - var" */
@@ -474,6 +514,10 @@ term:	SUB var /* same thing as "dst = 0 - var" */
 			string tempName = newTemp();
 			strcpy ($$.name, tempName.c_str());
 			
+			int number = atoi($2);
+			number = -1 * number;
+			$$.value = number;
+			
 			//genExprCode (dest, src1, src2, OP)
 			string newCode = genExprCode (tempName, "0", $2, "-");
 			//milCode = milCode + tempCode;
@@ -490,7 +534,10 @@ term:	SUB var /* same thing as "dst = 0 - var" */
 			milcode.push_back (newCode);
 		}
 		| var { strcpy($$.name, $1.name); }
-		| NUMBER { strcpy($$.name, $1); }
+		| NUMBER { strcpy($$.name, $1); 
+		    int number = atoi($1);
+			$$.value = number;
+			}
 		| L_PAREN expr R_PAREN { strcpy($$.name, $2.name);}
 		;
 
@@ -534,6 +581,42 @@ string newPred ()
 	
 	return newPredName;
 }
+
+string newLabel ()
+{
+	stringstream ss;
+	ss << label_ctr;
+	string newLabelName = "L" + ss.str();
+	label_ctr++;
+	
+	return newLabelName;
+}
+bool compare(int lhs, int rhs, int boolOp)
+{
+	switch(boolOp) {
+		case 0:
+			return lhs == rhs;
+			break;
+		case 1:
+			return lhs != rhs;
+			break;
+		case 2:
+			return lhs < rhs;
+			break;
+		case 3:
+			return lhs > rhs;
+			break;
+		case 4:
+			return lhs <= rhs;
+			break;
+		case 5:
+			return lhs >= rhs;
+			break;
+		default:
+			break;
+	}
+}
+
 
 int main() {
 

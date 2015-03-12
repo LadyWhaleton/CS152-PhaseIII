@@ -1,12 +1,2 @@
 Error at line 8: redeclaration of 'sqrt_n'
 program -> PROGRAM IDENT SEMICOLON block END_PROGRAM
-	. _n
-	. _x
-	. _y
-	. _sqrt_n
- : START
-	+ t0, 6, 2
-	% t1, 3, 3
-	* t2, t1, 4
-	- t3, t0, t2
-	= y, t3
