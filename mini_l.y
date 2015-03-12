@@ -26,8 +26,10 @@ int label_ctr, temp_ctr, pred_ctr  = 0;
 
 bool errorFound = false;
 bool isArrayAccess = false;
-bool boolval = false;
+bool boolval = true;
+bool skipCode = false;
 int booleanOp = 0;
+int iLeader = 0;
 list<string> milcode;
 
 string newTemp();
@@ -71,7 +73,7 @@ enum IDENT_TYPE
 	};
 
     
-    struct attribute myAttri; 
+   struct attribute myAttri; 
 }
 
 %error-verbose
@@ -108,6 +110,7 @@ enum IDENT_TYPE
 
 %type <myAttri> statement;
 %type <myAttri> stmt_loop;
+%type <myAttri> if_body;
 
 %type <myAttri> declaration;
 %type <myAttri> array_decl;
@@ -142,6 +145,10 @@ program:    PROGRAM IDENT SEMICOLON block END_PROGRAM
 				cout << *it << endl;
 			cout << " : EndLabel\n";
 	  }
+      else
+      {
+        cout << "error found! Will not print program!\n";
+      }
 	}
 	| error IDENT SEMICOLON block END_PROGRAM
 	| PROGRAM IDENT SEMICOLON block error
@@ -228,7 +235,7 @@ iIDENT:		IDENT
 				// otherwise, why are you redeclaring ident??!?! >:(	
 				else
 				{
-					errorFound = true;
+				//	errorFound = true;
 					cout << "Error at line " << currLine 
 						 << ": redeclaration of '" << ident << "'\n";
 				}	
@@ -249,15 +256,20 @@ array_decl: 	/*empty */ { $$.type = TYPE_INT; }
 /* var assign var_branch {$$.code = "hi"} */
 statement:	var assign expr 
 			{
-				string varName = $1.name;
-				string exprName = $3.name;
-				//if variable is not in the symbol table, then this will
-				//immediately create the variable and assign value, which
-				//is bad.
-				symbol_table[varName] = $3.value;
+                if(!skipCode) {
+		    		string varName = $1.name;
+	    			string exprName = $3.name;
+			    	//if variable is not in the symbol table, then this will
+    				//immediately create the variable and assign value, which
+	    			//is bad.
+		    		symbol_table[varName] = $3.value;
 				
-				string newCode = "\t= " + varName + ", " + exprName;
-				milcode.push_back (newCode);
+			    	string newCode = "\t= " + varName + ", " + exprName;
+    				milcode.push_back (newCode);
+                }
+                else {
+                    cout << "var ASSIGN expr skipped\n";
+                }
 			} 
 			| var assign bool_expr QUESTION expr COLON expr
 			{
@@ -266,35 +278,64 @@ statement:	var assign expr
 				
 				string expr1Name = $5.name;
 				string expr2Name = $7.name;
-				
+				string newCode = "";
 				if(boolval) {
-					string newCode = "\t= " + varName + ", " + expr1Name;
+					newCode = "\t= " + varName + ", " + expr1Name;
 					milcode.push_back (newCode);
-				}
+                   				}
 				else {
-					string newCode = "\t= " + varName + ", " + expr2Name;
+				    newCode = "\t= " + varName + ", " + expr2Name;
 					milcode.push_back (newCode);
 				}
+              //  $$.code = (char*) newCode.c_str();
+
+                
 			}
-         	| IF bool_expr THEN if_body ENDIF
+         	| IF bool_expr then if_body ENDIF
          	{
 				string boolExprName = $2.name;
-				if(!boolval) {
-					string labelName = newLabel();
-					leader_list.push_back(labelName);
-					string newCode = " := " + labelName;
-					milcode.push_back(newCode);
-				}				
+				if(!boolval)
+                {
+                	string labelName = newLabel();
+					leader_list.pop_back();
+					string newCode = " := " + labelName; 
+					milcode.push_back (newCode);
+				}
+                else
+                {
+                    if($4.code == NULL || $4.code == "")
+                    {
+                        cout << "newCode is null\n";
+                    }
+                    else
+                    {
+                        string newCode = $4.code;
+                        milcode.push_back(newCode); 
+                    }
+                }
+                skipCode = false;
+                string newCode = " := " + newLabel();
+                milcode.push_back(newCode);
          	}
-         	| WHILE bool_expr BEGINLOOP stmt_loop ENDLOOP {}
+         	| WHILE bool_expr BEGINLOOP stmt_loop ENDLOOP
+            {
+                	string labelName = newLabel();
+					leader_list.push_back(labelName);
+					string newCode = " := " + labelName; 
+					milcode.push_back (newCode);
+                
+            }
         	| DO BEGINLOOP stmt_loop ENDLOOP WHILE bool_expr {}
          	| READ var_loop {}
          	| WRITE var_loop {}
          	| BREAK {}
          	| CONTINUE {}
-         	| EXIT {}
+         	| EXIT 
+            {
+
+            }
          	;
-         	
+
 assign: ASSIGN 
 		| error 
 /*		
@@ -323,8 +364,8 @@ var:    IDENT
 				int temp = symbol_table[ident];
 				$$.value = temp;
 			}
-			
 			strcpy ($$.name, $1);
+          
 		}
 		
         | IDENT L_BRACKET expr R_BRACKET 
@@ -334,17 +375,48 @@ var:    IDENT
 			*/	
         } 
         ;
-        
 
-if_body:    stmt_loop ELSEIF bool_expr elseif_body 
+then:   THEN {
+                if(!boolval) {
+                    skipCode = true;
+                }
+                else {
+                    skipCode = false;
+                    string labelName = newLabel();
+                    leader_list.push_back(labelName);
+                    //milcode.push_back(" " + labelName);
+                }
+             }
+            
+        | error
+        ;
+
+if_body:    stmt_loop ELSEIF bool_expr elseif_body
             | stmt_loop ELSE stmt_loop   
-            | stmt_loop 
+            | stmt_loop
+            {
+                if(boolval) {
+                    cout << "if_body.boolval = true\n";
+                    if($1.code == NULL || $1.code == "") { 
+
+                        cout << "if_body.code is null\n";               
+                    }
+                    else
+                    { 
+                        string newCode = $1.code;
+                        cout << newCode + "\n";
+                        milcode.push_back(newCode);
+                        $$.code = $1.code;
+                    }
+                }
+            }
             ;
 
-elseif_body:    stmt_loop ELSEIF bool_expr elseif_body 
+elseif_body:    stmt_loop ELSEIF bool_expr elseif_body
                 | stmt_loop ELSE stmt_loop 
                 | stmt_loop 
-                ;   
+                ;
+
 
 bool_expr:	relation_and_expr {}
 			| relation_and_expr OR bool_expr {}
@@ -586,7 +658,7 @@ string newLabel ()
 {
 	stringstream ss;
 	ss << label_ctr;
-	string newLabelName = "L" + ss.str();
+	string newLabelName = " L" + ss.str();
 	label_ctr++;
 	
 	return newLabelName;

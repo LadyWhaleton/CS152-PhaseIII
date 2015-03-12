@@ -148,7 +148,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 58 "mini_l.y"
+#line 60 "mini_l.y"
 {
     char* IntString;
     char* String;
@@ -165,7 +165,7 @@ typedef union YYSTYPE
 	};
 
     
-    struct attribute myAttri; 
+   struct attribute myAttri; 
 }
 /* Line 1529 of yacc.c.  */
 #line 172 "y.tab.h"

@@ -4,14 +4,21 @@ program primes;
 n : integer;
 x: integer;
 y: integer;
-sqrt_n : integer;
-sqrt_n: integer;
 
 
 beginprogram	
+x := 4;
+if true then 
+    y := 5;
+    x := 6;
+    n := 1;
+    x := 2;
+    if true then
+        y := 22;
+    endif;
+endif;
+y := 7;
 
-
-n := 3 + 2 == x ? 1 : 2;
 
 endprogram
 

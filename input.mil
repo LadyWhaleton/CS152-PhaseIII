@@ -1,2 +1,21 @@
-Error at line 8: redeclaration of 'sqrt_n'
+if_body.boolval = true
+if_body.code is null
+newCode is null
+if_body.boolval = true
+if_body.code is null
+newCode is null
 program -> PROGRAM IDENT SEMICOLON block END_PROGRAM
+	. _n
+	. _x
+	. _y
+ : START
+	= x, 4
+	= y, 5
+	= x, 6
+	= n, 1
+	= x, 2
+	= y, 22
+ :=  L2
+ :=  L3
+	= y, 7
+ : EndLabel
