@@ -597,14 +597,14 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint16 yyrline[] =
 {
        0,   121,   121,   124,   131,   132,   133,   134,   137,   138,
-     141,   144,   145,   146,   149,   150,   151,   152,   155,   193,
-     198,   199,   200,   203,   225,   226,   227,   228,   229,   230,
-     231,   232,   236,   244,   245,   246,   247,   248,   249,   250,
-     251,   252,   255,   256,   263,   264,   267,   283,   292,   293,
-     294,   297,   298,   299,   302,   303,   306,   307,   310,   332,
-     344,   356,   365,   379,   380,   381,   382,   385,   386,   387,
-     388,   389,   390,   422,   423,   434,   448,   460,   471,   482,
-     485,   496,   507,   518,   519,   520
+     141,   144,   145,   146,   149,   150,   151,   152,   155,   192,
+     197,   198,   199,   202,   224,   225,   226,   227,   228,   229,
+     230,   231,   235,   243,   244,   245,   246,   247,   248,   249,
+     250,   251,   254,   255,   262,   263,   266,   281,   290,   291,
+     292,   295,   296,   297,   300,   301,   304,   305,   308,   325,
+     337,   349,   358,   370,   371,   372,   373,   376,   377,   378,
+     379,   380,   381,   409,   410,   419,   430,   440,   449,   458,
+     461,   471,   481,   491,   492,   493
 };
 #endif
 
@@ -1668,7 +1668,6 @@ yyreduce:
 			string arrSize = (yyvsp[(3) - (4)].myAttri).size;
 			
 			// generate milcode
-			// TODO
 			string newCode = "\t.[] _" +  ident + ", " + arrSize;
 			milcode.push_back (newCode);
 		}
@@ -1678,7 +1677,7 @@ yyreduce:
 		else if ( it == symbol_table.end() && (yyvsp[(3) - (4)].myAttri).type == TYPE_INT)
 		{
 			symbol_table[ident] = TYPE_INT;
-			// TODO
+			
 			string newCode =  "\t. _" + ident;
 			milcode.push_back (newCode);
 		}
@@ -1688,12 +1687,12 @@ yyreduce:
     break;
 
   case 19:
-#line 194 "mini_l.y"
+#line 193 "mini_l.y"
     {printf("Syntax error at line %d: invalid declaration\n", currLine);;}
     break;
 
   case 23:
-#line 204 "mini_l.y"
+#line 203 "mini_l.y"
     { 
 				string ident = (yyvsp[(1) - (1)].String); 
 				// check if ident is already in the symbol table
@@ -1715,47 +1714,47 @@ yyreduce:
     break;
 
   case 24:
-#line 225 "mini_l.y"
+#line 224 "mini_l.y"
     { (yyval.myAttri).type = TYPE_INT; ;}
     break;
 
   case 25:
-#line 226 "mini_l.y"
+#line 225 "mini_l.y"
     { (yyval.myAttri).type = TYPE_ARRAY; (yyval.myAttri).size = (yyvsp[(3) - (5)].IntString) ;}
     break;
 
   case 26:
-#line 227 "mini_l.y"
+#line 226 "mini_l.y"
     {printf("Invalid array declaration\n");;}
     break;
 
   case 27:
-#line 228 "mini_l.y"
+#line 227 "mini_l.y"
     { printf ("Invalid array declaration!\n"); ;}
     break;
 
   case 28:
-#line 229 "mini_l.y"
+#line 228 "mini_l.y"
     { printf ("Invalid array declaration!\n"); ;}
     break;
 
   case 29:
-#line 230 "mini_l.y"
+#line 229 "mini_l.y"
     { printf ("Invalid array declaration!\n"); ;}
     break;
 
   case 30:
-#line 231 "mini_l.y"
+#line 230 "mini_l.y"
     {;}
     break;
 
   case 31:
-#line 232 "mini_l.y"
+#line 231 "mini_l.y"
     {;}
     break;
 
   case 32:
-#line 237 "mini_l.y"
+#line 236 "mini_l.y"
     {
 				string varName = (yyvsp[(1) - (3)].myAttri).name;
 				string exprName = (yyvsp[(3) - (3)].myAttri).name;
@@ -1766,53 +1765,52 @@ yyreduce:
     break;
 
   case 34:
-#line 245 "mini_l.y"
+#line 244 "mini_l.y"
     {;}
     break;
 
   case 35:
-#line 246 "mini_l.y"
+#line 245 "mini_l.y"
     {;}
     break;
 
   case 36:
-#line 247 "mini_l.y"
+#line 246 "mini_l.y"
     {;}
     break;
 
   case 37:
-#line 248 "mini_l.y"
+#line 247 "mini_l.y"
     {;}
     break;
 
   case 38:
-#line 249 "mini_l.y"
+#line 248 "mini_l.y"
     {;}
     break;
 
   case 39:
-#line 250 "mini_l.y"
+#line 249 "mini_l.y"
     {;}
     break;
 
   case 40:
-#line 251 "mini_l.y"
+#line 250 "mini_l.y"
     {;}
     break;
 
   case 41:
-#line 252 "mini_l.y"
+#line 251 "mini_l.y"
     {;}
     break;
 
   case 46:
-#line 268 "mini_l.y"
+#line 267 "mini_l.y"
     {
 			string ident = (yyvsp[(1) - (1)].String); 
 			// check if ident is already in the symbol table
 			map <string, int>::iterator it = symbol_table.find (ident);
 			
-			// TODO:	
 			if ( it == symbol_table.end() )
 			{
 				cout << "Error at line " << currLine << ": '" << ident
@@ -1824,7 +1822,7 @@ yyreduce:
     break;
 
   case 47:
-#line 284 "mini_l.y"
+#line 282 "mini_l.y"
     {
 			/*	need to determine if array access or array assignment
 				ex: n = array[0] vs array[0] = n;
@@ -1833,38 +1831,33 @@ yyreduce:
     break;
 
   case 54:
-#line 302 "mini_l.y"
+#line 300 "mini_l.y"
     {;}
     break;
 
   case 55:
-#line 303 "mini_l.y"
+#line 301 "mini_l.y"
     {;}
     break;
 
   case 56:
-#line 306 "mini_l.y"
+#line 304 "mini_l.y"
     {;}
     break;
 
   case 57:
-#line 307 "mini_l.y"
+#line 305 "mini_l.y"
     {;}
     break;
 
   case 58:
-#line 311 "mini_l.y"
+#line 309 "mini_l.y"
     {
-					string expr1_name = (yyvsp[(2) - (4)].myAttri).name;
-					string expr2_name = (yyvsp[(4) - (4)].myAttri).name;
-					
-					string bool_op = (yyvsp[(3) - (4)].myAttri).name;
-					
 					string predName1 = newPred();
 					
 					// first, we generate code for "p_n = expr comp expr"
 					//genExprCode (dest, src1, src2, OP)
-					string newCode = genExprCode (predName1, expr1_name, expr2_name, bool_op);
+					string newCode = genExprCode (predName1, (yyvsp[(2) - (4)].myAttri).name, (yyvsp[(4) - (4)].myAttri).name, (yyvsp[(3) - (4)].myAttri).name);
 					milcode.push_back (newCode);
 					
 					// then, we generate code for "p_(n+1) = NOT p_n"
@@ -1878,7 +1871,7 @@ yyreduce:
     break;
 
   case 59:
-#line 333 "mini_l.y"
+#line 326 "mini_l.y"
     {
 					// p contains the value of the bool_expr
 					// p <- false <- NOT true
@@ -1893,7 +1886,7 @@ yyreduce:
     break;
 
   case 60:
-#line 345 "mini_l.y"
+#line 338 "mini_l.y"
     {	
 					// p contains the value of the bool_expr
 					// p <- true <- NOT false
@@ -1908,7 +1901,7 @@ yyreduce:
     break;
 
   case 61:
-#line 357 "mini_l.y"
+#line 350 "mini_l.y"
     {
 					string boolexpr_name = (yyvsp[(3) - (4)].myAttri).name;
 					string predName = newPred();
@@ -1920,214 +1913,198 @@ yyreduce:
     break;
 
   case 62:
-#line 366 "mini_l.y"
+#line 359 "mini_l.y"
     {
-					string expr1_name = (yyvsp[(1) - (3)].myAttri).name;
-					string expr2_name = (yyvsp[(3) - (3)].myAttri).name;
-					
+
 					string bool_op = (yyvsp[(2) - (3)].myAttri).name;
 					
 					string predName = newPred();
 					strcpy ((yyval.myAttri).name, predName.c_str());
 					
-					string newCode = genExprCode(predName, expr1_name, expr2_name, bool_op);
+					string newCode = genExprCode(predName, (yyvsp[(1) - (3)].myAttri).name, (yyvsp[(3) - (3)].myAttri).name, bool_op);
 					milcode.push_back (newCode);
 					
 				;}
     break;
 
   case 63:
-#line 379 "mini_l.y"
+#line 370 "mini_l.y"
     { string temp = "true"; strcpy((yyval.myAttri).name, temp.c_str()); ;}
     break;
 
   case 64:
-#line 380 "mini_l.y"
+#line 371 "mini_l.y"
     { string temp = "false"; strcpy ((yyval.myAttri).name, temp.c_str()); ;}
     break;
 
   case 65:
-#line 381 "mini_l.y"
+#line 372 "mini_l.y"
     { strcpy ((yyval.myAttri).name, (yyval.myAttri).name); ;}
     break;
 
   case 66:
-#line 382 "mini_l.y"
+#line 373 "mini_l.y"
     { printf("Syntax Error: Invalid condition\n"); ;}
     break;
 
   case 67:
-#line 385 "mini_l.y"
+#line 376 "mini_l.y"
     { string temp = "=="; strcpy((yyval.myAttri).name, temp.c_str()); ;}
     break;
 
   case 68:
-#line 386 "mini_l.y"
+#line 377 "mini_l.y"
     { string temp = "!="; strcpy((yyval.myAttri).name, temp.c_str()); ;}
     break;
 
   case 69:
-#line 387 "mini_l.y"
+#line 378 "mini_l.y"
     { string temp = "<"; strcpy((yyval.myAttri).name, temp.c_str()); ;}
     break;
 
   case 70:
-#line 388 "mini_l.y"
+#line 379 "mini_l.y"
     { string temp = ">"; strcpy((yyval.myAttri).name, temp.c_str()); ;}
     break;
 
   case 71:
-#line 389 "mini_l.y"
+#line 380 "mini_l.y"
     { string temp = ">="; strcpy ((yyval.myAttri).name, temp.c_str()); ;}
     break;
 
   case 72:
-#line 390 "mini_l.y"
+#line 381 "mini_l.y"
     { string temp = "<="; strcpy ((yyval.myAttri).name, temp.c_str()); ;}
     break;
 
   case 73:
-#line 422 "mini_l.y"
+#line 409 "mini_l.y"
     { strcpy((yyval.myAttri).name, (yyvsp[(1) - (1)].myAttri).name); ;}
     break;
 
   case 74:
-#line 424 "mini_l.y"
+#line 411 "mini_l.y"
     {
-			string exprName = (yyvsp[(1) - (3)].myAttri).name;
-			string multExprName = (yyvsp[(3) - (3)].myAttri).name;
 			string tempName = newTemp();
 			strcpy ((yyval.myAttri).name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, exprName, multExprName, "+");
+			string newCode = genExprCode (tempName, (yyvsp[(1) - (3)].myAttri).name, (yyvsp[(3) - (3)].myAttri).name, "+");
 			milcode.push_back (newCode);
 		;}
     break;
 
   case 75:
-#line 435 "mini_l.y"
+#line 420 "mini_l.y"
     {
-			string exprName = (yyvsp[(1) - (3)].myAttri).name;
-			string multExprName = (yyvsp[(3) - (3)].myAttri).name;
-			
 			string tempName = newTemp();
 			strcpy ((yyval.myAttri).name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, exprName, multExprName, "-");
+			string newCode = genExprCode (tempName, (yyvsp[(1) - (3)].myAttri).name, (yyvsp[(3) - (3)].myAttri).name, "-");
 			milcode.push_back (newCode);
 		;}
     break;
 
   case 76:
-#line 449 "mini_l.y"
+#line 431 "mini_l.y"
     {
-			string termName = (yyvsp[(3) - (3)].myAttri).name;
-			string mult_exprName = (yyvsp[(1) - (3)].myAttri).name;
 			string tempName = newTemp();
 			strcpy((yyval.myAttri).name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode(tempName, mult_exprName, termName, "*");
+			string newCode = genExprCode(tempName, (yyvsp[(1) - (3)].myAttri).name, (yyvsp[(3) - (3)].myAttri).name, "*");
 			milcode.push_back (newCode);
 			
 		;}
     break;
 
   case 77:
-#line 461 "mini_l.y"
+#line 441 "mini_l.y"
     {
-			string termName = (yyvsp[(3) - (3)].myAttri).name;
-			string mult_exprName = (yyvsp[(1) - (3)].myAttri).name;
 			string tempName = newTemp();
 			strcpy((yyval.myAttri).name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode(tempName, mult_exprName, termName, "/");
+			string newCode = genExprCode(tempName, (yyvsp[(1) - (3)].myAttri).name, (yyvsp[(3) - (3)].myAttri).name, "/");
 			milcode.push_back (newCode);
 		;}
     break;
 
   case 78:
-#line 472 "mini_l.y"
+#line 450 "mini_l.y"
     {
-			string termName = (yyvsp[(3) - (3)].myAttri).name;
-			string mult_exprName = (yyvsp[(1) - (3)].myAttri).name;
 			string tempName = newTemp();
 			strcpy((yyval.myAttri).name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode(tempName, mult_exprName, termName, "%");
+			string newCode = genExprCode(tempName, (yyvsp[(1) - (3)].myAttri).name, (yyvsp[(3) - (3)].myAttri).name, "%");
 			milcode.push_back (newCode);
 		;}
     break;
 
   case 79:
-#line 482 "mini_l.y"
+#line 458 "mini_l.y"
     { strcpy((yyval.myAttri).name, (yyvsp[(1) - (1)].myAttri).name); ;}
     break;
 
   case 80:
-#line 486 "mini_l.y"
+#line 462 "mini_l.y"
     { 
-			string varName = (yyvsp[(2) - (2)].myAttri).name;
 			string tempName = newTemp();
 			strcpy ((yyval.myAttri).name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, "0", varName, "-");
+			string newCode = genExprCode (tempName, "0", (yyvsp[(2) - (2)].myAttri).name, "-");
 			// milCode = milCode + tempCode;
 			milcode.push_back (newCode);
 		;}
     break;
 
   case 81:
-#line 497 "mini_l.y"
+#line 472 "mini_l.y"
     {
-			string varName = (yyvsp[(2) - (2)].IntString);
 			string tempName = newTemp();
 			strcpy ((yyval.myAttri).name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, "0", varName, "-");
+			string newCode = genExprCode (tempName, "0", (yyvsp[(2) - (2)].IntString), "-");
 			//milCode = milCode + tempCode;
 			milcode.push_back (newCode);
 		;}
     break;
 
   case 82:
-#line 508 "mini_l.y"
+#line 482 "mini_l.y"
     {
-			string varName = (yyvsp[(3) - (4)].myAttri).name;
 			string tempName = newTemp();
 			strcpy ((yyval.myAttri).name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, "0", varName, "-");
+			string newCode = genExprCode (tempName, "0", (yyvsp[(3) - (4)].myAttri).name, "-");
 			// milCode = milCode + tempCode;
 			milcode.push_back (newCode);
 		;}
     break;
 
   case 83:
-#line 518 "mini_l.y"
+#line 491 "mini_l.y"
     { strcpy((yyval.myAttri).name, (yyvsp[(1) - (1)].myAttri).name); ;}
     break;
 
   case 84:
-#line 519 "mini_l.y"
+#line 492 "mini_l.y"
     { strcpy((yyval.myAttri).name, (yyvsp[(1) - (1)].IntString)); ;}
     break;
 
   case 85:
-#line 520 "mini_l.y"
+#line 493 "mini_l.y"
     { strcpy((yyval.myAttri).name, (yyvsp[(2) - (3)].myAttri).name);;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 2131 "y.tab.c"
+#line 2108 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2341,7 +2318,7 @@ yyreturn:
 }
 
 
-#line 523 "mini_l.y"
+#line 496 "mini_l.y"
 
 
 /*	generates the mil code for the expressions

@@ -19,10 +19,12 @@ mil:
 Tmail:
 	tar -cvf CS152-Phase3.tar .
 	echo "body" | mutt -a *.tar -s "CS152 Phase 3" -- twang033@ucr.edu
+	rm CS152-Phase3.tar
 
 Smail:
 	tar -xvf CS152-Phase3.tar .
 	echo "body" | mutt -a *.tar -s "CS152 Phase 3" -- stong002@ucr.edu
+	rm CS152-Phase3.tar
 
 tar:
 	tar -cvf CS152-Phase3.tar .

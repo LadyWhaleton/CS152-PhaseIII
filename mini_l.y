@@ -173,7 +173,6 @@ declaration: ident_loop COLON array_decl INTEGER
 			string arrSize = $3.size;
 			
 			// generate milcode
-			// TODO
 			string newCode = "\t.[] _" +  ident + ", " + arrSize;
 			milcode.push_back (newCode);
 		}
@@ -183,7 +182,7 @@ declaration: ident_loop COLON array_decl INTEGER
 		else if ( it == symbol_table.end() && $3.type == TYPE_INT)
 		{
 			symbol_table[ident] = TYPE_INT;
-			// TODO
+			
 			string newCode =  "\t. _" + ident;
 			milcode.push_back (newCode);
 		}
@@ -270,7 +269,6 @@ var:    IDENT
 			// check if ident is already in the symbol table
 			map <string, int>::iterator it = symbol_table.find (ident);
 			
-			// TODO:	
 			if ( it == symbol_table.end() )
 			{
 				cout << "Error at line " << currLine << ": '" << ident
@@ -309,16 +307,11 @@ relation_and_expr: 	relation_expr {}
 
 relation_expr:	NOT expr comp expr 
 				{
-					string expr1_name = $2.name;
-					string expr2_name = $4.name;
-					
-					string bool_op = $3.name;
-					
 					string predName1 = newPred();
 					
 					// first, we generate code for "p_n = expr comp expr"
 					//genExprCode (dest, src1, src2, OP)
-					string newCode = genExprCode (predName1, expr1_name, expr2_name, bool_op);
+					string newCode = genExprCode (predName1, $2.name, $4.name, $3.name);
 					milcode.push_back (newCode);
 					
 					// then, we generate code for "p_(n+1) = NOT p_n"
@@ -364,17 +357,13 @@ relation_expr:	NOT expr comp expr
 				}
 				| expr comp expr 
 				{
-					string expr1_name = $1.name;
-					string expr2_name = $3.name;
-					
 					string bool_op = $2.name;
 					
 					string predName = newPred();
 					strcpy ($$.name, predName.c_str());
 					
-					string newCode = genExprCode(predName, expr1_name, expr2_name, bool_op);
-					milcode.push_back (newCode);
-					
+					string newCode = genExprCode(predName, $1.name, $3.name, bool_op);
+					milcode.push_back (newCode);	
 				}
 				| TRUE { string temp = "true"; strcpy($$.name, temp.c_str()); }
 				| FALSE { string temp = "false"; strcpy ($$.name, temp.c_str()); }
@@ -395,24 +384,20 @@ comp:	EQ { string temp = "=="; strcpy($$.name, temp.c_str()); }
 expr:	mult_expr { $$.name = $1.name; }
 		| mult_expr PLUS expr
 		{
-			string multExprName = $1.name;
-			string exprName = $3.name;
 			string tempName = newTemp();
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, multExprName, exprName, "+");
+			string newCode = genExprCode (tempName, $1.name, $3.name, "+");
 			milcode.push_back (newCode);
 		}
 		| mult_expr SUB expr 
 		{
-			string multExprName = $1.name;
-			string exprName = $3.name;
 			string tempName = newTemp();
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, multExprName, exprName, "-");
+			string newCode = genExprCode (tempName, $1.name, $3.name, "-");
 			milcode.push_back (newCode);
 		}
 		;
@@ -422,61 +407,50 @@ expr:	mult_expr { $$.name = $1.name; }
 expr:	mult_expr { strcpy($$.name, $1.name); }
 		| expr PLUS mult_expr
 		{
-			string exprName = $1.name;
-			string multExprName = $3.name;
 			string tempName = newTemp();
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, exprName, multExprName, "+");
+			string newCode = genExprCode (tempName, $1.name, $3.name, "+");
 			milcode.push_back (newCode);
 		}
 		| expr SUB mult_expr 
 		{
-			string exprName = $1.name;
-			string multExprName = $3.name;
-			
 			string tempName = newTemp();
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, exprName, multExprName, "-");
+			string newCode = genExprCode (tempName, $1.name, $3.name, "-");
 			milcode.push_back (newCode);
 		}
 		;
 
 mult_expr:	mult_expr MULT term
 		{
-			string termName = $3.name;
-			string mult_exprName = $1.name;
 			string tempName = newTemp();
 			strcpy($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode(tempName, mult_exprName, termName, "*");
+			string newCode = genExprCode(tempName, $1.name, $3.name, "*");
 			milcode.push_back (newCode);
 			
 		}
 		| mult_expr DIV term
 		{
-			string termName = $3.name;
-			string mult_exprName = $1.name;
 			string tempName = newTemp();
 			strcpy($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode(tempName, mult_exprName, termName, "/");
+			string newCode = genExprCode(tempName, $1.name, $3.name, "/");
 			milcode.push_back (newCode);
 		}
 		| mult_expr MOD term 
 		{
-			string termName = $3.name;
-			string mult_exprName = $1.name;
 			string tempName = newTemp();
 			strcpy($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode(tempName, mult_exprName, termName, "%");
+			string newCode = genExprCode(tempName, $1.name, $3.name, "%");
 			milcode.push_back (newCode);
 		}
 		| term { strcpy($$.name, $1.name); }
@@ -484,34 +458,31 @@ mult_expr:	mult_expr MULT term
 
 term:	SUB var /* same thing as "dst = 0 - var" */
 		{ 
-			string varName = $2.name;
 			string tempName = newTemp();
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, "0", varName, "-");
+			string newCode = genExprCode (tempName, "0", $2.name, "-");
 			// milCode = milCode + tempCode;
 			milcode.push_back (newCode);
 		}
 		| SUB NUMBER 
 		{
-			string varName = $2;
 			string tempName = newTemp();
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, "0", varName, "-");
+			string newCode = genExprCode (tempName, "0", $2, "-");
 			//milCode = milCode + tempCode;
 			milcode.push_back (newCode);
 		}
 		| SUB L_PAREN expr R_PAREN 
 		{
-			string varName = $3.name;
 			string tempName = newTemp();
 			strcpy ($$.name, tempName.c_str());
 			
 			//genExprCode (dest, src1, src2, OP)
-			string newCode = genExprCode (tempName, "0", varName, "-");
+			string newCode = genExprCode (tempName, "0", $3.name, "-");
 			// milCode = milCode + tempCode;
 			milcode.push_back (newCode);
 		}
