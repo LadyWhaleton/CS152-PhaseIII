@@ -7,18 +7,16 @@ y: integer;
 
 
 beginprogram	
-x := 4;
-if true then 
-    y := 5;
-    x := 6;
-    n := 1;
-    x := 2;
-    if true then
-        y := 22;
-    endif;
-endif;
-y := 7;
 
+	while x > n beginloop
+		x:=1;
+		read n;
+		
+		while y == 0 beginloop
+			write n;
+		endloop;
+		
+	endloop;
 
 endprogram
 

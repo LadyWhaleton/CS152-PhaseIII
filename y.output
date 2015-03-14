@@ -51,84 +51,101 @@ Grammar
 
    31 statement: var assign expr
    32          | var assign bool_expr "?" expr ":" expr
-   33          | IF bool_expr then if_body ENDIF
-   34          | WHILE bool_expr BEGINLOOP stmt_loop ENDLOOP
-   35          | DO BEGINLOOP stmt_loop ENDLOOP WHILE bool_expr
-   36          | READ var_loop
-   37          | WRITE var_loop
+   33          | if_ bool_expr middle THEN if_body ENDIF
+   34          | iWHILE bool_expr iBEGINLOOP stmt_loop ENDLOOP
+   35          | iDO BEGINLOOP stmt_loop ENDLOOP WHILE bool_expr
+   36          | iREAD var_loop
+   37          | iWRITE var_loop
    38          | BREAK
    39          | CONTINUE
    40          | EXIT
 
-   41 assign: ":="
-   42       | error
+   41 middle: /* empty */
 
-   43 var_loop: var "," var_loop
-   44         | var
+   42 iWHILE: WHILE
 
-   45 var: IDENT
-   46    | IDENT "[" expr "]"
+   43 iBEGINLOOP: BEGINLOOP
 
-   47 then: THEN
-   48     | error
+   44 iDO: DO
 
-   49 if_body: stmt_loop ELSEIF bool_expr elseif_body
-   50        | stmt_loop ELSE stmt_loop
-   51        | stmt_loop
+   45 assign: ":="
+   46       | error
 
-   52 elseif_body: stmt_loop ELSEIF bool_expr elseif_body
-   53            | stmt_loop ELSE stmt_loop
-   54            | stmt_loop
+   47 iREAD: READ
 
-   55 bool_expr: relation_and_expr
-   56          | relation_and_expr OR bool_expr
+   48 iWRITE: WRITE
 
-   57 relation_and_expr: relation_expr
-   58                  | relation_expr AND relation_and_expr
+   49 var_loop: var iCOMMA var_loop
+   50         | var
 
-   59 relation_expr: NOT expr comp expr
-   60              | NOT TRUE
-   61              | NOT FALSE
-   62              | NOT "(" bool_expr ")"
-   63              | expr comp expr
-   64              | TRUE
-   65              | FALSE
-   66              | "(" bool_expr ")"
-   67              | error
+   51 iCOMMA: ","
 
-   68 comp: EQ
-   69     | NEQ
-   70     | LT
-   71     | GT
-   72     | LTE
-   73     | GTE
+   52 var: IDENT
+   53    | IDENT "[" expr "]"
 
-   74 expr: mult_expr
-   75     | expr "+" mult_expr
-   76     | expr "-" mult_expr
+   54 if_: IF
 
-   77 mult_expr: mult_expr "*" term
-   78          | mult_expr "/" term
-   79          | mult_expr "%" term
-   80          | term
+   55 if_body: stmt_loop elseif_ bool_expr middle elseif_body
+   56        | stmt_loop else_ stmt_loop
+   57        | stmt_loop
 
-   81 term: "-" var
-   82     | "-" NUMBER
-   83     | "-" "(" expr ")"
-   84     | var
-   85     | NUMBER
-   86     | "(" expr ")"
+   58 elseif_: ELSEIF
+
+   59 elseif_body: stmt_loop elseif_ bool_expr middle elseif_body
+   60            | stmt_loop else_ stmt_loop
+   61            | stmt_loop
+
+   62 else_: ELSE
+
+   63 bool_expr: relation_and_expr
+   64          | relation_and_expr OR bool_expr
+
+   65 relation_and_expr: relation_expr
+   66                  | relation_expr AND relation_and_expr
+
+   67 relation_expr: NOT expr comp expr
+   68              | NOT TRUE
+   69              | NOT FALSE
+   70              | NOT "(" bool_expr ")"
+   71              | expr comp expr
+   72              | TRUE
+   73              | FALSE
+   74              | "(" bool_expr ")"
+   75              | error
+
+   76 comp: EQ
+   77     | NEQ
+   78     | LT
+   79     | GT
+   80     | LTE
+   81     | GTE
+
+   82 expr: mult_expr
+   83     | expr "+" mult_expr
+   84     | expr "-" mult_expr
+
+   85 mult_expr: mult_expr "*" term
+   86          | mult_expr "/" term
+   87          | mult_expr "%" term
+   88          | term
+
+   89 term: "-" var
+   90     | "-" NUMBER
+   91     | "-" "(" expr ")"
+   92     | var
+   93     | NUMBER
+   94     | "(" expr ")"
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
-error (256) 3 4 5 6 8 12 15 16 21 29 30 42 48 67
-"+" (258) 75
-"-" (259) 76 81 82 83
-"*" (260) 77
-"/" (261) 78
-"%" (262) 79
+error (256) 3 4 5 6 8 12 15 16 21 29 30 46 75
+"+" (258) 83
+"-" (259) 84 89 90 91
+"*" (260) 85
+"/" (261) 86
+"%" (262) 87
 "=" (263)
 PROGRAM (264) 2 4 5 6
 BEGIN_PROGRAM (265) 9
@@ -136,42 +153,42 @@ END_PROGRAM (266) 2 3 5 6
 INTEGER (267) 17 18
 ARRAY (268) 24 26 27 28 29 30
 OF (269) 24 25 26 27 28
-IF (270) 33
-THEN (271) 47
+IF (270) 54
+THEN (271) 33
 ENDIF (272) 33
-ELSE (273) 50 53
-ELSEIF (274) 49 52
-WHILE (275) 34 35
-DO (276) 35
-BEGINLOOP (277) 34 35
+ELSE (273) 62
+ELSEIF (274) 58
+WHILE (275) 35 42
+DO (276) 44
+BEGINLOOP (277) 35 43
 ENDLOOP (278) 34 35
 BREAK (279) 38
 CONTINUE (280) 39
 EXIT (281) 40
-READ (282) 36
-WRITE (283) 37
-AND (284) 58
-OR (285) 56
-NOT (286) 59 60 61 62
-TRUE (287) 60 64
-FALSE (288) 61 65
-EQ (289) 68
-NEQ (290) 69
-LT (291) 70
-GT (292) 71
-LTE (293) 72
-GTE (294) 73
+READ (282) 47
+WRITE (283) 48
+AND (284) 66
+OR (285) 64
+NOT (286) 67 68 69 70
+TRUE (287) 68 72
+FALSE (288) 69 73
+EQ (289) 76
+NEQ (290) 77
+LT (291) 78
+GT (292) 79
+LTE (293) 80
+GTE (294) 81
 ";" (295) 2 3 4 5 10 11 13 14
 ":" (296) 17 32
-"," (297) 19 43
+"," (297) 19 51
 "?" (298) 32
-"[" (299) 24 28 29 30 46
-"]" (300) 24 25 27 29 46
-"(" (301) 62 66 83 86
-")" (302) 62 66 83 86
-":=" (303) 41
-IDENT (304) 2 3 4 6 21 22 25 45 46
-NUMBER (305) 24 25 28 29 30 82 85
+"[" (299) 24 28 29 30 53
+"]" (300) 24 25 27 29 53
+"(" (301) 70 74 91 94
+")" (302) 70 74 91 94
+":=" (303) 45
+IDENT (304) 2 3 4 6 21 22 25 52 53
+NUMBER (305) 24 25 28 29 30 90 93
 COMMENT (306)
 NEG (307)
 
@@ -191,8 +208,8 @@ bBEGIN_PROGRAM (57)
 decl_loop (58)
     on left: 10 11 12, on right: 7 8 10
 stmt_loop (59)
-    on left: 13 14 15 16, on right: 7 8 13 15 34 35 49 50 51 52 53
-    54
+    on left: 13 14 15 16, on right: 7 8 13 15 34 35 55 56 57 59 60
+    61
 declaration (60)
     on left: 17 18, on right: 10 11 12
 ident_loop (61)
@@ -203,32 +220,50 @@ array_decl (63)
     on left: 23 24 25 26 27 28 29 30, on right: 17 18
 statement (64)
     on left: 31 32 33 34 35 36 37 38 39 40, on right: 13 14 15 16
-assign (65)
-    on left: 41 42, on right: 31 32
-var_loop (66)
-    on left: 43 44, on right: 36 37 43
-var (67)
-    on left: 45 46, on right: 31 32 43 44 81 84
-then (68)
-    on left: 47 48, on right: 33
-if_body (69)
-    on left: 49 50 51, on right: 33
-elseif_body (70)
-    on left: 52 53 54, on right: 49 52
-bool_expr (71)
-    on left: 55 56, on right: 32 33 34 35 49 52 56 62 66
-relation_and_expr (72)
-    on left: 57 58, on right: 55 56 58
-relation_expr (73)
-    on left: 59 60 61 62 63 64 65 66 67, on right: 57 58
-comp (74)
-    on left: 68 69 70 71 72 73, on right: 59 63
-expr (75)
-    on left: 74 75 76, on right: 31 32 46 59 63 75 76 83 86
-mult_expr (76)
-    on left: 77 78 79 80, on right: 74 75 76 77 78 79
-term (77)
-    on left: 81 82 83 84 85 86, on right: 77 78 79 80
+middle (65)
+    on left: 41, on right: 33 55 59
+iWHILE (66)
+    on left: 42, on right: 34
+iBEGINLOOP (67)
+    on left: 43, on right: 34
+iDO (68)
+    on left: 44, on right: 35
+assign (69)
+    on left: 45 46, on right: 31 32
+iREAD (70)
+    on left: 47, on right: 36
+iWRITE (71)
+    on left: 48, on right: 37
+var_loop (72)
+    on left: 49 50, on right: 36 37 49
+iCOMMA (73)
+    on left: 51, on right: 49
+var (74)
+    on left: 52 53, on right: 31 32 49 50 89 92
+if_ (75)
+    on left: 54, on right: 33
+if_body (76)
+    on left: 55 56 57, on right: 33
+elseif_ (77)
+    on left: 58, on right: 55 59
+elseif_body (78)
+    on left: 59 60 61, on right: 55 59
+else_ (79)
+    on left: 62, on right: 56 60
+bool_expr (80)
+    on left: 63 64, on right: 32 33 34 35 55 59 64 70 74
+relation_and_expr (81)
+    on left: 65 66, on right: 63 64 66
+relation_expr (82)
+    on left: 67 68 69 70 71 72 73 74 75, on right: 65 66
+comp (83)
+    on left: 76 77 78 79 80 81, on right: 67 71
+expr (84)
+    on left: 82 83 84, on right: 31 32 53 67 71 83 84 91 94
+mult_expr (85)
+    on left: 85 86 87 88, on right: 82 83 84 85 86 87
+term (86)
+    on left: 89 90 91 92 93 94, on right: 85 86 87 88
 
 
 state 0
@@ -480,7 +515,12 @@ state 24
 
     stmt_loop  go to state 48
     statement  go to state 49
-    var        go to state 50
+    iWHILE     go to state 50
+    iDO        go to state 51
+    iREAD      go to state 52
+    iWRITE     go to state 53
+    var        go to state 54
+    if_        go to state 55
 
 
 state 25
@@ -504,9 +544,14 @@ state 26
     WRITE     shift, and go to state 46
     IDENT     shift, and go to state 47
 
-    stmt_loop  go to state 51
+    stmt_loop  go to state 56
     statement  go to state 49
-    var        go to state 50
+    iWHILE     go to state 50
+    iDO        go to state 51
+    iREAD      go to state 52
+    iWRITE     go to state 53
+    var        go to state 54
+    if_        go to state 55
 
 
 state 27
@@ -525,7 +570,7 @@ state 28
 
     $default  reduce using rule 11 (decl_loop)
 
-    decl_loop    go to state 52
+    decl_loop    go to state 57
     declaration  go to state 16
     ident_loop   go to state 17
     iIDENT       go to state 18
@@ -540,9 +585,9 @@ state 29
    29           | ARRAY . "[" NUMBER "]" error
    30           | ARRAY . "[" NUMBER error
 
-    OF   shift, and go to state 53
-    "["  shift, and go to state 54
-    "]"  shift, and go to state 55
+    OF   shift, and go to state 58
+    "["  shift, and go to state 59
+    "]"  shift, and go to state 60
 
 
 state 30
@@ -554,21 +599,21 @@ state 30
 
     $default  reduce using rule 23 (array_decl)
 
-    array_decl  go to state 56
+    array_decl  go to state 61
 
 
 state 31
 
    25 array_decl: IDENT . NUMBER "]" OF
 
-    NUMBER  shift, and go to state 57
+    NUMBER  shift, and go to state 62
 
 
 state 32
 
    18 declaration: ident_loop array_decl . INTEGER
 
-    INTEGER  shift, and go to state 58
+    INTEGER  shift, and go to state 63
 
 
 state 33
@@ -577,7 +622,7 @@ state 33
 
     IDENT  shift, and go to state 13
 
-    ident_loop  go to state 59
+    ident_loop  go to state 64
     iIDENT      go to state 18
 
 
@@ -618,53 +663,23 @@ state 38
 
 state 39
 
-   33 statement: IF . bool_expr then if_body ENDIF
+   54 if_: IF .
 
-    error   shift, and go to state 60
-    "-"     shift, and go to state 61
-    NOT     shift, and go to state 62
-    TRUE    shift, and go to state 63
-    FALSE   shift, and go to state 64
-    "("     shift, and go to state 65
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var                go to state 67
-    bool_expr          go to state 68
-    relation_and_expr  go to state 69
-    relation_expr      go to state 70
-    expr               go to state 71
-    mult_expr          go to state 72
-    term               go to state 73
+    $default  reduce using rule 54 (if_)
 
 
 state 40
 
-   34 statement: WHILE . bool_expr BEGINLOOP stmt_loop ENDLOOP
+   42 iWHILE: WHILE .
 
-    error   shift, and go to state 60
-    "-"     shift, and go to state 61
-    NOT     shift, and go to state 62
-    TRUE    shift, and go to state 63
-    FALSE   shift, and go to state 64
-    "("     shift, and go to state 65
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var                go to state 67
-    bool_expr          go to state 74
-    relation_and_expr  go to state 69
-    relation_expr      go to state 70
-    expr               go to state 71
-    mult_expr          go to state 72
-    term               go to state 73
+    $default  reduce using rule 42 (iWHILE)
 
 
 state 41
 
-   35 statement: DO . BEGINLOOP stmt_loop ENDLOOP WHILE bool_expr
+   44 iDO: DO .
 
-    BEGINLOOP  shift, and go to state 75
+    $default  reduce using rule 44 (iDO)
 
 
 state 42
@@ -690,32 +705,26 @@ state 44
 
 state 45
 
-   36 statement: READ . var_loop
+   47 iREAD: READ .
 
-    IDENT  shift, and go to state 47
-
-    var_loop  go to state 76
-    var       go to state 77
+    $default  reduce using rule 47 (iREAD)
 
 
 state 46
 
-   37 statement: WRITE . var_loop
+   48 iWRITE: WRITE .
 
-    IDENT  shift, and go to state 47
-
-    var_loop  go to state 78
-    var       go to state 77
+    $default  reduce using rule 48 (iWRITE)
 
 
 state 47
 
-   45 var: IDENT .
-   46    | IDENT . "[" expr "]"
+   52 var: IDENT .
+   53    | IDENT . "[" expr "]"
 
-    "["  shift, and go to state 79
+    "["  shift, and go to state 65
 
-    $default  reduce using rule 45 (var)
+    $default  reduce using rule 52 (var)
 
 
 state 48
@@ -732,313 +741,174 @@ state 49
    15          | statement . error stmt_loop
    16          | statement . error
 
-    error  shift, and go to state 80
-    ";"    shift, and go to state 81
+    error  shift, and go to state 66
+    ";"    shift, and go to state 67
 
 
 state 50
 
-   31 statement: var . assign expr
-   32          | var . assign bool_expr "?" expr ":" expr
+   34 statement: iWHILE . bool_expr iBEGINLOOP stmt_loop ENDLOOP
 
-    error  shift, and go to state 82
-    ":="   shift, and go to state 83
+    error   shift, and go to state 68
+    "-"     shift, and go to state 69
+    NOT     shift, and go to state 70
+    TRUE    shift, and go to state 71
+    FALSE   shift, and go to state 72
+    "("     shift, and go to state 73
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
 
-    assign  go to state 84
+    var                go to state 75
+    bool_expr          go to state 76
+    relation_and_expr  go to state 77
+    relation_expr      go to state 78
+    expr               go to state 79
+    mult_expr          go to state 80
+    term               go to state 81
 
 
 state 51
+
+   35 statement: iDO . BEGINLOOP stmt_loop ENDLOOP WHILE bool_expr
+
+    BEGINLOOP  shift, and go to state 82
+
+
+state 52
+
+   36 statement: iREAD . var_loop
+
+    IDENT  shift, and go to state 47
+
+    var_loop  go to state 83
+    var       go to state 84
+
+
+state 53
+
+   37 statement: iWRITE . var_loop
+
+    IDENT  shift, and go to state 47
+
+    var_loop  go to state 85
+    var       go to state 84
+
+
+state 54
+
+   31 statement: var . assign expr
+   32          | var . assign bool_expr "?" expr ":" expr
+
+    error  shift, and go to state 86
+    ":="   shift, and go to state 87
+
+    assign  go to state 88
+
+
+state 55
+
+   33 statement: if_ . bool_expr middle THEN if_body ENDIF
+
+    error   shift, and go to state 68
+    "-"     shift, and go to state 69
+    NOT     shift, and go to state 70
+    TRUE    shift, and go to state 71
+    FALSE   shift, and go to state 72
+    "("     shift, and go to state 73
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var                go to state 75
+    bool_expr          go to state 89
+    relation_and_expr  go to state 77
+    relation_expr      go to state 78
+    expr               go to state 79
+    mult_expr          go to state 80
+    term               go to state 81
+
+
+state 56
 
     7 block: decl_loop bBEGIN_PROGRAM stmt_loop .
 
     $default  reduce using rule 7 (block)
 
 
-state 52
+state 57
 
    10 decl_loop: declaration ";" decl_loop .
 
     $default  reduce using rule 10 (decl_loop)
 
 
-state 53
+state 58
 
    26 array_decl: ARRAY OF .
 
     $default  reduce using rule 26 (array_decl)
 
 
-state 54
+state 59
 
    24 array_decl: ARRAY "[" . NUMBER "]" OF
    28           | ARRAY "[" . NUMBER OF
    29           | ARRAY "[" . NUMBER "]" error
    30           | ARRAY "[" . NUMBER error
 
-    NUMBER  shift, and go to state 85
+    NUMBER  shift, and go to state 90
 
 
-state 55
+state 60
 
    27 array_decl: ARRAY "]" . OF
 
-    OF  shift, and go to state 86
+    OF  shift, and go to state 91
 
 
-state 56
+state 61
 
    17 declaration: ident_loop ":" array_decl . INTEGER
 
-    INTEGER  shift, and go to state 87
+    INTEGER  shift, and go to state 92
 
 
-state 57
+state 62
 
    25 array_decl: IDENT NUMBER . "]" OF
 
-    "]"  shift, and go to state 88
+    "]"  shift, and go to state 93
 
 
-state 58
+state 63
 
    18 declaration: ident_loop array_decl INTEGER .
 
     $default  reduce using rule 18 (declaration)
 
 
-state 59
+state 64
 
    19 ident_loop: iIDENT "," ident_loop .
 
     $default  reduce using rule 19 (ident_loop)
 
 
-state 60
-
-   67 relation_expr: error .
-
-    $default  reduce using rule 67 (relation_expr)
-
-
-state 61
-
-   81 term: "-" . var
-   82     | "-" . NUMBER
-   83     | "-" . "(" expr ")"
-
-    "("     shift, and go to state 89
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 90
-
-    var  go to state 91
-
-
-state 62
-
-   59 relation_expr: NOT . expr comp expr
-   60              | NOT . TRUE
-   61              | NOT . FALSE
-   62              | NOT . "(" bool_expr ")"
-
-    "-"     shift, and go to state 61
-    TRUE    shift, and go to state 92
-    FALSE   shift, and go to state 93
-    "("     shift, and go to state 94
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var        go to state 67
-    expr       go to state 95
-    mult_expr  go to state 72
-    term       go to state 73
-
-
-state 63
-
-   64 relation_expr: TRUE .
-
-    $default  reduce using rule 64 (relation_expr)
-
-
-state 64
-
-   65 relation_expr: FALSE .
-
-    $default  reduce using rule 65 (relation_expr)
-
-
 state 65
 
-   66 relation_expr: "(" . bool_expr ")"
-   86 term: "(" . expr ")"
+   53 var: IDENT "[" . expr "]"
 
-    error   shift, and go to state 60
-    "-"     shift, and go to state 61
-    NOT     shift, and go to state 62
-    TRUE    shift, and go to state 63
-    FALSE   shift, and go to state 64
-    "("     shift, and go to state 65
+    "-"     shift, and go to state 69
+    "("     shift, and go to state 94
     IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
+    NUMBER  shift, and go to state 74
 
-    var                go to state 67
-    bool_expr          go to state 96
-    relation_and_expr  go to state 69
-    relation_expr      go to state 70
-    expr               go to state 97
-    mult_expr          go to state 72
-    term               go to state 73
+    var        go to state 75
+    expr       go to state 95
+    mult_expr  go to state 80
+    term       go to state 81
 
 
 state 66
-
-   85 term: NUMBER .
-
-    $default  reduce using rule 85 (term)
-
-
-state 67
-
-   84 term: var .
-
-    $default  reduce using rule 84 (term)
-
-
-state 68
-
-   33 statement: IF bool_expr . then if_body ENDIF
-
-    error  shift, and go to state 98
-    THEN   shift, and go to state 99
-
-    then  go to state 100
-
-
-state 69
-
-   55 bool_expr: relation_and_expr .
-   56          | relation_and_expr . OR bool_expr
-
-    OR  shift, and go to state 101
-
-    $default  reduce using rule 55 (bool_expr)
-
-
-state 70
-
-   57 relation_and_expr: relation_expr .
-   58                  | relation_expr . AND relation_and_expr
-
-    AND  shift, and go to state 102
-
-    $default  reduce using rule 57 (relation_and_expr)
-
-
-state 71
-
-   63 relation_expr: expr . comp expr
-   75 expr: expr . "+" mult_expr
-   76     | expr . "-" mult_expr
-
-    "+"  shift, and go to state 103
-    "-"  shift, and go to state 104
-    EQ   shift, and go to state 105
-    NEQ  shift, and go to state 106
-    LT   shift, and go to state 107
-    GT   shift, and go to state 108
-    LTE  shift, and go to state 109
-    GTE  shift, and go to state 110
-
-    comp  go to state 111
-
-
-state 72
-
-   74 expr: mult_expr .
-   77 mult_expr: mult_expr . "*" term
-   78          | mult_expr . "/" term
-   79          | mult_expr . "%" term
-
-    "*"  shift, and go to state 112
-    "/"  shift, and go to state 113
-    "%"  shift, and go to state 114
-
-    $default  reduce using rule 74 (expr)
-
-
-state 73
-
-   80 mult_expr: term .
-
-    $default  reduce using rule 80 (mult_expr)
-
-
-state 74
-
-   34 statement: WHILE bool_expr . BEGINLOOP stmt_loop ENDLOOP
-
-    BEGINLOOP  shift, and go to state 115
-
-
-state 75
-
-   35 statement: DO BEGINLOOP . stmt_loop ENDLOOP WHILE bool_expr
-
-    IF        shift, and go to state 39
-    WHILE     shift, and go to state 40
-    DO        shift, and go to state 41
-    BREAK     shift, and go to state 42
-    CONTINUE  shift, and go to state 43
-    EXIT      shift, and go to state 44
-    READ      shift, and go to state 45
-    WRITE     shift, and go to state 46
-    IDENT     shift, and go to state 47
-
-    stmt_loop  go to state 116
-    statement  go to state 49
-    var        go to state 50
-
-
-state 76
-
-   36 statement: READ var_loop .
-
-    $default  reduce using rule 36 (statement)
-
-
-state 77
-
-   43 var_loop: var . "," var_loop
-   44         | var .
-
-    ","  shift, and go to state 117
-
-    $default  reduce using rule 44 (var_loop)
-
-
-state 78
-
-   37 statement: WRITE var_loop .
-
-    $default  reduce using rule 37 (statement)
-
-
-state 79
-
-   46 var: IDENT "[" . expr "]"
-
-    "-"     shift, and go to state 61
-    "("     shift, and go to state 118
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var        go to state 67
-    expr       go to state 119
-    mult_expr  go to state 72
-    term       go to state 73
-
-
-state 80
 
    15 stmt_loop: statement error . stmt_loop
    16          | statement error .
@@ -1055,12 +925,17 @@ state 80
 
     $default  reduce using rule 16 (stmt_loop)
 
-    stmt_loop  go to state 120
+    stmt_loop  go to state 96
     statement  go to state 49
-    var        go to state 50
+    iWHILE     go to state 50
+    iDO        go to state 51
+    iREAD      go to state 52
+    iWRITE     go to state 53
+    var        go to state 54
+    if_        go to state 55
 
 
-state 81
+state 67
 
    13 stmt_loop: statement ";" . stmt_loop
    14          | statement ";" .
@@ -1077,981 +952,1106 @@ state 81
 
     $default  reduce using rule 14 (stmt_loop)
 
-    stmt_loop  go to state 121
+    stmt_loop  go to state 97
     statement  go to state 49
-    var        go to state 50
+    iWHILE     go to state 50
+    iDO        go to state 51
+    iREAD      go to state 52
+    iWRITE     go to state 53
+    var        go to state 54
+    if_        go to state 55
+
+
+state 68
+
+   75 relation_expr: error .
+
+    $default  reduce using rule 75 (relation_expr)
+
+
+state 69
+
+   89 term: "-" . var
+   90     | "-" . NUMBER
+   91     | "-" . "(" expr ")"
+
+    "("     shift, and go to state 98
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 99
+
+    var  go to state 100
+
+
+state 70
+
+   67 relation_expr: NOT . expr comp expr
+   68              | NOT . TRUE
+   69              | NOT . FALSE
+   70              | NOT . "(" bool_expr ")"
+
+    "-"     shift, and go to state 69
+    TRUE    shift, and go to state 101
+    FALSE   shift, and go to state 102
+    "("     shift, and go to state 103
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var        go to state 75
+    expr       go to state 104
+    mult_expr  go to state 80
+    term       go to state 81
+
+
+state 71
+
+   72 relation_expr: TRUE .
+
+    $default  reduce using rule 72 (relation_expr)
+
+
+state 72
+
+   73 relation_expr: FALSE .
+
+    $default  reduce using rule 73 (relation_expr)
+
+
+state 73
+
+   74 relation_expr: "(" . bool_expr ")"
+   94 term: "(" . expr ")"
+
+    error   shift, and go to state 68
+    "-"     shift, and go to state 69
+    NOT     shift, and go to state 70
+    TRUE    shift, and go to state 71
+    FALSE   shift, and go to state 72
+    "("     shift, and go to state 73
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var                go to state 75
+    bool_expr          go to state 105
+    relation_and_expr  go to state 77
+    relation_expr      go to state 78
+    expr               go to state 106
+    mult_expr          go to state 80
+    term               go to state 81
+
+
+state 74
+
+   93 term: NUMBER .
+
+    $default  reduce using rule 93 (term)
+
+
+state 75
+
+   92 term: var .
+
+    $default  reduce using rule 92 (term)
+
+
+state 76
+
+   34 statement: iWHILE bool_expr . iBEGINLOOP stmt_loop ENDLOOP
+
+    BEGINLOOP  shift, and go to state 107
+
+    iBEGINLOOP  go to state 108
+
+
+state 77
+
+   63 bool_expr: relation_and_expr .
+   64          | relation_and_expr . OR bool_expr
+
+    OR  shift, and go to state 109
+
+    $default  reduce using rule 63 (bool_expr)
+
+
+state 78
+
+   65 relation_and_expr: relation_expr .
+   66                  | relation_expr . AND relation_and_expr
+
+    AND  shift, and go to state 110
+
+    $default  reduce using rule 65 (relation_and_expr)
+
+
+state 79
+
+   71 relation_expr: expr . comp expr
+   83 expr: expr . "+" mult_expr
+   84     | expr . "-" mult_expr
+
+    "+"  shift, and go to state 111
+    "-"  shift, and go to state 112
+    EQ   shift, and go to state 113
+    NEQ  shift, and go to state 114
+    LT   shift, and go to state 115
+    GT   shift, and go to state 116
+    LTE  shift, and go to state 117
+    GTE  shift, and go to state 118
+
+    comp  go to state 119
+
+
+state 80
+
+   82 expr: mult_expr .
+   85 mult_expr: mult_expr . "*" term
+   86          | mult_expr . "/" term
+   87          | mult_expr . "%" term
+
+    "*"  shift, and go to state 120
+    "/"  shift, and go to state 121
+    "%"  shift, and go to state 122
+
+    $default  reduce using rule 82 (expr)
+
+
+state 81
+
+   88 mult_expr: term .
+
+    $default  reduce using rule 88 (mult_expr)
 
 
 state 82
 
-   42 assign: error .
+   35 statement: iDO BEGINLOOP . stmt_loop ENDLOOP WHILE bool_expr
 
-    $default  reduce using rule 42 (assign)
+    IF        shift, and go to state 39
+    WHILE     shift, and go to state 40
+    DO        shift, and go to state 41
+    BREAK     shift, and go to state 42
+    CONTINUE  shift, and go to state 43
+    EXIT      shift, and go to state 44
+    READ      shift, and go to state 45
+    WRITE     shift, and go to state 46
+    IDENT     shift, and go to state 47
+
+    stmt_loop  go to state 123
+    statement  go to state 49
+    iWHILE     go to state 50
+    iDO        go to state 51
+    iREAD      go to state 52
+    iWRITE     go to state 53
+    var        go to state 54
+    if_        go to state 55
 
 
 state 83
 
-   41 assign: ":=" .
+   36 statement: iREAD var_loop .
 
-    $default  reduce using rule 41 (assign)
+    $default  reduce using rule 36 (statement)
 
 
 state 84
 
-   31 statement: var assign . expr
-   32          | var assign . bool_expr "?" expr ":" expr
+   49 var_loop: var . iCOMMA var_loop
+   50         | var .
 
-    error   shift, and go to state 60
-    "-"     shift, and go to state 61
-    NOT     shift, and go to state 62
-    TRUE    shift, and go to state 63
-    FALSE   shift, and go to state 64
-    "("     shift, and go to state 65
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
+    ","  shift, and go to state 124
 
-    var                go to state 67
-    bool_expr          go to state 122
-    relation_and_expr  go to state 69
-    relation_expr      go to state 70
-    expr               go to state 123
-    mult_expr          go to state 72
-    term               go to state 73
+    $default  reduce using rule 50 (var_loop)
+
+    iCOMMA  go to state 125
 
 
 state 85
+
+   37 statement: iWRITE var_loop .
+
+    $default  reduce using rule 37 (statement)
+
+
+state 86
+
+   46 assign: error .
+
+    $default  reduce using rule 46 (assign)
+
+
+state 87
+
+   45 assign: ":=" .
+
+    $default  reduce using rule 45 (assign)
+
+
+state 88
+
+   31 statement: var assign . expr
+   32          | var assign . bool_expr "?" expr ":" expr
+
+    error   shift, and go to state 68
+    "-"     shift, and go to state 69
+    NOT     shift, and go to state 70
+    TRUE    shift, and go to state 71
+    FALSE   shift, and go to state 72
+    "("     shift, and go to state 73
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var                go to state 75
+    bool_expr          go to state 126
+    relation_and_expr  go to state 77
+    relation_expr      go to state 78
+    expr               go to state 127
+    mult_expr          go to state 80
+    term               go to state 81
+
+
+state 89
+
+   33 statement: if_ bool_expr . middle THEN if_body ENDIF
+
+    $default  reduce using rule 41 (middle)
+
+    middle  go to state 128
+
+
+state 90
 
    24 array_decl: ARRAY "[" NUMBER . "]" OF
    28           | ARRAY "[" NUMBER . OF
    29           | ARRAY "[" NUMBER . "]" error
    30           | ARRAY "[" NUMBER . error
 
-    error  shift, and go to state 124
-    OF     shift, and go to state 125
-    "]"    shift, and go to state 126
+    error  shift, and go to state 129
+    OF     shift, and go to state 130
+    "]"    shift, and go to state 131
 
 
-state 86
+state 91
 
    27 array_decl: ARRAY "]" OF .
 
     $default  reduce using rule 27 (array_decl)
 
 
-state 87
+state 92
 
    17 declaration: ident_loop ":" array_decl INTEGER .
 
     $default  reduce using rule 17 (declaration)
 
 
-state 88
+state 93
 
    25 array_decl: IDENT NUMBER "]" . OF
 
-    OF  shift, and go to state 127
-
-
-state 89
-
-   83 term: "-" "(" . expr ")"
-
-    "-"     shift, and go to state 61
-    "("     shift, and go to state 118
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var        go to state 67
-    expr       go to state 128
-    mult_expr  go to state 72
-    term       go to state 73
-
-
-state 90
-
-   82 term: "-" NUMBER .
-
-    $default  reduce using rule 82 (term)
-
-
-state 91
-
-   81 term: "-" var .
-
-    $default  reduce using rule 81 (term)
-
-
-state 92
-
-   60 relation_expr: NOT TRUE .
-
-    $default  reduce using rule 60 (relation_expr)
-
-
-state 93
-
-   61 relation_expr: NOT FALSE .
-
-    $default  reduce using rule 61 (relation_expr)
+    OF  shift, and go to state 132
 
 
 state 94
 
-   62 relation_expr: NOT "(" . bool_expr ")"
-   86 term: "(" . expr ")"
+   94 term: "(" . expr ")"
 
-    error   shift, and go to state 60
-    "-"     shift, and go to state 61
-    NOT     shift, and go to state 62
-    TRUE    shift, and go to state 63
-    FALSE   shift, and go to state 64
-    "("     shift, and go to state 65
+    "-"     shift, and go to state 69
+    "("     shift, and go to state 94
     IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
+    NUMBER  shift, and go to state 74
 
-    var                go to state 67
-    bool_expr          go to state 129
-    relation_and_expr  go to state 69
-    relation_expr      go to state 70
-    expr               go to state 97
-    mult_expr          go to state 72
-    term               go to state 73
+    var        go to state 75
+    expr       go to state 133
+    mult_expr  go to state 80
+    term       go to state 81
 
 
 state 95
 
-   59 relation_expr: NOT expr . comp expr
-   75 expr: expr . "+" mult_expr
-   76     | expr . "-" mult_expr
+   53 var: IDENT "[" expr . "]"
+   83 expr: expr . "+" mult_expr
+   84     | expr . "-" mult_expr
 
-    "+"  shift, and go to state 103
-    "-"  shift, and go to state 104
-    EQ   shift, and go to state 105
-    NEQ  shift, and go to state 106
-    LT   shift, and go to state 107
-    GT   shift, and go to state 108
-    LTE  shift, and go to state 109
-    GTE  shift, and go to state 110
-
-    comp  go to state 130
+    "+"  shift, and go to state 111
+    "-"  shift, and go to state 112
+    "]"  shift, and go to state 134
 
 
 state 96
-
-   66 relation_expr: "(" bool_expr . ")"
-
-    ")"  shift, and go to state 131
-
-
-state 97
-
-   63 relation_expr: expr . comp expr
-   75 expr: expr . "+" mult_expr
-   76     | expr . "-" mult_expr
-   86 term: "(" expr . ")"
-
-    "+"  shift, and go to state 103
-    "-"  shift, and go to state 104
-    EQ   shift, and go to state 105
-    NEQ  shift, and go to state 106
-    LT   shift, and go to state 107
-    GT   shift, and go to state 108
-    LTE  shift, and go to state 109
-    GTE  shift, and go to state 110
-    ")"  shift, and go to state 132
-
-    comp  go to state 111
-
-
-state 98
-
-   48 then: error .
-
-    $default  reduce using rule 48 (then)
-
-
-state 99
-
-   47 then: THEN .
-
-    $default  reduce using rule 47 (then)
-
-
-state 100
-
-   33 statement: IF bool_expr then . if_body ENDIF
-
-    IF        shift, and go to state 39
-    WHILE     shift, and go to state 40
-    DO        shift, and go to state 41
-    BREAK     shift, and go to state 42
-    CONTINUE  shift, and go to state 43
-    EXIT      shift, and go to state 44
-    READ      shift, and go to state 45
-    WRITE     shift, and go to state 46
-    IDENT     shift, and go to state 47
-
-    stmt_loop  go to state 133
-    statement  go to state 49
-    var        go to state 50
-    if_body    go to state 134
-
-
-state 101
-
-   56 bool_expr: relation_and_expr OR . bool_expr
-
-    error   shift, and go to state 60
-    "-"     shift, and go to state 61
-    NOT     shift, and go to state 62
-    TRUE    shift, and go to state 63
-    FALSE   shift, and go to state 64
-    "("     shift, and go to state 65
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var                go to state 67
-    bool_expr          go to state 135
-    relation_and_expr  go to state 69
-    relation_expr      go to state 70
-    expr               go to state 71
-    mult_expr          go to state 72
-    term               go to state 73
-
-
-state 102
-
-   58 relation_and_expr: relation_expr AND . relation_and_expr
-
-    error   shift, and go to state 60
-    "-"     shift, and go to state 61
-    NOT     shift, and go to state 62
-    TRUE    shift, and go to state 63
-    FALSE   shift, and go to state 64
-    "("     shift, and go to state 65
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var                go to state 67
-    relation_and_expr  go to state 136
-    relation_expr      go to state 70
-    expr               go to state 71
-    mult_expr          go to state 72
-    term               go to state 73
-
-
-state 103
-
-   75 expr: expr "+" . mult_expr
-
-    "-"     shift, and go to state 61
-    "("     shift, and go to state 118
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var        go to state 67
-    mult_expr  go to state 137
-    term       go to state 73
-
-
-state 104
-
-   76 expr: expr "-" . mult_expr
-
-    "-"     shift, and go to state 61
-    "("     shift, and go to state 118
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var        go to state 67
-    mult_expr  go to state 138
-    term       go to state 73
-
-
-state 105
-
-   68 comp: EQ .
-
-    $default  reduce using rule 68 (comp)
-
-
-state 106
-
-   69 comp: NEQ .
-
-    $default  reduce using rule 69 (comp)
-
-
-state 107
-
-   70 comp: LT .
-
-    $default  reduce using rule 70 (comp)
-
-
-state 108
-
-   71 comp: GT .
-
-    $default  reduce using rule 71 (comp)
-
-
-state 109
-
-   72 comp: LTE .
-
-    $default  reduce using rule 72 (comp)
-
-
-state 110
-
-   73 comp: GTE .
-
-    $default  reduce using rule 73 (comp)
-
-
-state 111
-
-   63 relation_expr: expr comp . expr
-
-    "-"     shift, and go to state 61
-    "("     shift, and go to state 118
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var        go to state 67
-    expr       go to state 139
-    mult_expr  go to state 72
-    term       go to state 73
-
-
-state 112
-
-   77 mult_expr: mult_expr "*" . term
-
-    "-"     shift, and go to state 61
-    "("     shift, and go to state 118
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var   go to state 67
-    term  go to state 140
-
-
-state 113
-
-   78 mult_expr: mult_expr "/" . term
-
-    "-"     shift, and go to state 61
-    "("     shift, and go to state 118
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var   go to state 67
-    term  go to state 141
-
-
-state 114
-
-   79 mult_expr: mult_expr "%" . term
-
-    "-"     shift, and go to state 61
-    "("     shift, and go to state 118
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var   go to state 67
-    term  go to state 142
-
-
-state 115
-
-   34 statement: WHILE bool_expr BEGINLOOP . stmt_loop ENDLOOP
-
-    IF        shift, and go to state 39
-    WHILE     shift, and go to state 40
-    DO        shift, and go to state 41
-    BREAK     shift, and go to state 42
-    CONTINUE  shift, and go to state 43
-    EXIT      shift, and go to state 44
-    READ      shift, and go to state 45
-    WRITE     shift, and go to state 46
-    IDENT     shift, and go to state 47
-
-    stmt_loop  go to state 143
-    statement  go to state 49
-    var        go to state 50
-
-
-state 116
-
-   35 statement: DO BEGINLOOP stmt_loop . ENDLOOP WHILE bool_expr
-
-    ENDLOOP  shift, and go to state 144
-
-
-state 117
-
-   43 var_loop: var "," . var_loop
-
-    IDENT  shift, and go to state 47
-
-    var_loop  go to state 145
-    var       go to state 77
-
-
-state 118
-
-   86 term: "(" . expr ")"
-
-    "-"     shift, and go to state 61
-    "("     shift, and go to state 118
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var        go to state 67
-    expr       go to state 146
-    mult_expr  go to state 72
-    term       go to state 73
-
-
-state 119
-
-   46 var: IDENT "[" expr . "]"
-   75 expr: expr . "+" mult_expr
-   76     | expr . "-" mult_expr
-
-    "+"  shift, and go to state 103
-    "-"  shift, and go to state 104
-    "]"  shift, and go to state 147
-
-
-state 120
 
    15 stmt_loop: statement error stmt_loop .
 
     $default  reduce using rule 15 (stmt_loop)
 
 
-state 121
+state 97
 
    13 stmt_loop: statement ";" stmt_loop .
 
     $default  reduce using rule 13 (stmt_loop)
 
 
+state 98
+
+   91 term: "-" "(" . expr ")"
+
+    "-"     shift, and go to state 69
+    "("     shift, and go to state 94
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var        go to state 75
+    expr       go to state 135
+    mult_expr  go to state 80
+    term       go to state 81
+
+
+state 99
+
+   90 term: "-" NUMBER .
+
+    $default  reduce using rule 90 (term)
+
+
+state 100
+
+   89 term: "-" var .
+
+    $default  reduce using rule 89 (term)
+
+
+state 101
+
+   68 relation_expr: NOT TRUE .
+
+    $default  reduce using rule 68 (relation_expr)
+
+
+state 102
+
+   69 relation_expr: NOT FALSE .
+
+    $default  reduce using rule 69 (relation_expr)
+
+
+state 103
+
+   70 relation_expr: NOT "(" . bool_expr ")"
+   94 term: "(" . expr ")"
+
+    error   shift, and go to state 68
+    "-"     shift, and go to state 69
+    NOT     shift, and go to state 70
+    TRUE    shift, and go to state 71
+    FALSE   shift, and go to state 72
+    "("     shift, and go to state 73
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var                go to state 75
+    bool_expr          go to state 136
+    relation_and_expr  go to state 77
+    relation_expr      go to state 78
+    expr               go to state 106
+    mult_expr          go to state 80
+    term               go to state 81
+
+
+state 104
+
+   67 relation_expr: NOT expr . comp expr
+   83 expr: expr . "+" mult_expr
+   84     | expr . "-" mult_expr
+
+    "+"  shift, and go to state 111
+    "-"  shift, and go to state 112
+    EQ   shift, and go to state 113
+    NEQ  shift, and go to state 114
+    LT   shift, and go to state 115
+    GT   shift, and go to state 116
+    LTE  shift, and go to state 117
+    GTE  shift, and go to state 118
+
+    comp  go to state 137
+
+
+state 105
+
+   74 relation_expr: "(" bool_expr . ")"
+
+    ")"  shift, and go to state 138
+
+
+state 106
+
+   71 relation_expr: expr . comp expr
+   83 expr: expr . "+" mult_expr
+   84     | expr . "-" mult_expr
+   94 term: "(" expr . ")"
+
+    "+"  shift, and go to state 111
+    "-"  shift, and go to state 112
+    EQ   shift, and go to state 113
+    NEQ  shift, and go to state 114
+    LT   shift, and go to state 115
+    GT   shift, and go to state 116
+    LTE  shift, and go to state 117
+    GTE  shift, and go to state 118
+    ")"  shift, and go to state 139
+
+    comp  go to state 119
+
+
+state 107
+
+   43 iBEGINLOOP: BEGINLOOP .
+
+    $default  reduce using rule 43 (iBEGINLOOP)
+
+
+state 108
+
+   34 statement: iWHILE bool_expr iBEGINLOOP . stmt_loop ENDLOOP
+
+    IF        shift, and go to state 39
+    WHILE     shift, and go to state 40
+    DO        shift, and go to state 41
+    BREAK     shift, and go to state 42
+    CONTINUE  shift, and go to state 43
+    EXIT      shift, and go to state 44
+    READ      shift, and go to state 45
+    WRITE     shift, and go to state 46
+    IDENT     shift, and go to state 47
+
+    stmt_loop  go to state 140
+    statement  go to state 49
+    iWHILE     go to state 50
+    iDO        go to state 51
+    iREAD      go to state 52
+    iWRITE     go to state 53
+    var        go to state 54
+    if_        go to state 55
+
+
+state 109
+
+   64 bool_expr: relation_and_expr OR . bool_expr
+
+    error   shift, and go to state 68
+    "-"     shift, and go to state 69
+    NOT     shift, and go to state 70
+    TRUE    shift, and go to state 71
+    FALSE   shift, and go to state 72
+    "("     shift, and go to state 73
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var                go to state 75
+    bool_expr          go to state 141
+    relation_and_expr  go to state 77
+    relation_expr      go to state 78
+    expr               go to state 79
+    mult_expr          go to state 80
+    term               go to state 81
+
+
+state 110
+
+   66 relation_and_expr: relation_expr AND . relation_and_expr
+
+    error   shift, and go to state 68
+    "-"     shift, and go to state 69
+    NOT     shift, and go to state 70
+    TRUE    shift, and go to state 71
+    FALSE   shift, and go to state 72
+    "("     shift, and go to state 73
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var                go to state 75
+    relation_and_expr  go to state 142
+    relation_expr      go to state 78
+    expr               go to state 79
+    mult_expr          go to state 80
+    term               go to state 81
+
+
+state 111
+
+   83 expr: expr "+" . mult_expr
+
+    "-"     shift, and go to state 69
+    "("     shift, and go to state 94
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var        go to state 75
+    mult_expr  go to state 143
+    term       go to state 81
+
+
+state 112
+
+   84 expr: expr "-" . mult_expr
+
+    "-"     shift, and go to state 69
+    "("     shift, and go to state 94
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var        go to state 75
+    mult_expr  go to state 144
+    term       go to state 81
+
+
+state 113
+
+   76 comp: EQ .
+
+    $default  reduce using rule 76 (comp)
+
+
+state 114
+
+   77 comp: NEQ .
+
+    $default  reduce using rule 77 (comp)
+
+
+state 115
+
+   78 comp: LT .
+
+    $default  reduce using rule 78 (comp)
+
+
+state 116
+
+   79 comp: GT .
+
+    $default  reduce using rule 79 (comp)
+
+
+state 117
+
+   80 comp: LTE .
+
+    $default  reduce using rule 80 (comp)
+
+
+state 118
+
+   81 comp: GTE .
+
+    $default  reduce using rule 81 (comp)
+
+
+state 119
+
+   71 relation_expr: expr comp . expr
+
+    "-"     shift, and go to state 69
+    "("     shift, and go to state 94
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var        go to state 75
+    expr       go to state 145
+    mult_expr  go to state 80
+    term       go to state 81
+
+
+state 120
+
+   85 mult_expr: mult_expr "*" . term
+
+    "-"     shift, and go to state 69
+    "("     shift, and go to state 94
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var   go to state 75
+    term  go to state 146
+
+
+state 121
+
+   86 mult_expr: mult_expr "/" . term
+
+    "-"     shift, and go to state 69
+    "("     shift, and go to state 94
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var   go to state 75
+    term  go to state 147
+
+
 state 122
 
-   32 statement: var assign bool_expr . "?" expr ":" expr
+   87 mult_expr: mult_expr "%" . term
 
-    "?"  shift, and go to state 148
+    "-"     shift, and go to state 69
+    "("     shift, and go to state 94
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var   go to state 75
+    term  go to state 148
 
 
 state 123
 
-   31 statement: var assign expr .
-   63 relation_expr: expr . comp expr
-   75 expr: expr . "+" mult_expr
-   76     | expr . "-" mult_expr
+   35 statement: iDO BEGINLOOP stmt_loop . ENDLOOP WHILE bool_expr
 
-    "+"  shift, and go to state 103
-    "-"  shift, and go to state 104
-    EQ   shift, and go to state 105
-    NEQ  shift, and go to state 106
-    LT   shift, and go to state 107
-    GT   shift, and go to state 108
-    LTE  shift, and go to state 109
-    GTE  shift, and go to state 110
-
-    $default  reduce using rule 31 (statement)
-
-    comp  go to state 111
+    ENDLOOP  shift, and go to state 149
 
 
 state 124
+
+   51 iCOMMA: "," .
+
+    $default  reduce using rule 51 (iCOMMA)
+
+
+state 125
+
+   49 var_loop: var iCOMMA . var_loop
+
+    IDENT  shift, and go to state 47
+
+    var_loop  go to state 150
+    var       go to state 84
+
+
+state 126
+
+   32 statement: var assign bool_expr . "?" expr ":" expr
+
+    "?"  shift, and go to state 151
+
+
+state 127
+
+   31 statement: var assign expr .
+   71 relation_expr: expr . comp expr
+   83 expr: expr . "+" mult_expr
+   84     | expr . "-" mult_expr
+
+    "+"  shift, and go to state 111
+    "-"  shift, and go to state 112
+    EQ   shift, and go to state 113
+    NEQ  shift, and go to state 114
+    LT   shift, and go to state 115
+    GT   shift, and go to state 116
+    LTE  shift, and go to state 117
+    GTE  shift, and go to state 118
+
+    $default  reduce using rule 31 (statement)
+
+    comp  go to state 119
+
+
+state 128
+
+   33 statement: if_ bool_expr middle . THEN if_body ENDIF
+
+    THEN  shift, and go to state 152
+
+
+state 129
 
    30 array_decl: ARRAY "[" NUMBER error .
 
     $default  reduce using rule 30 (array_decl)
 
 
-state 125
+state 130
 
    28 array_decl: ARRAY "[" NUMBER OF .
 
     $default  reduce using rule 28 (array_decl)
 
 
-state 126
+state 131
 
    24 array_decl: ARRAY "[" NUMBER "]" . OF
    29           | ARRAY "[" NUMBER "]" . error
 
-    error  shift, and go to state 149
-    OF     shift, and go to state 150
+    error  shift, and go to state 153
+    OF     shift, and go to state 154
 
 
-state 127
+state 132
 
    25 array_decl: IDENT NUMBER "]" OF .
 
     $default  reduce using rule 25 (array_decl)
 
 
-state 128
-
-   75 expr: expr . "+" mult_expr
-   76     | expr . "-" mult_expr
-   83 term: "-" "(" expr . ")"
-
-    "+"  shift, and go to state 103
-    "-"  shift, and go to state 104
-    ")"  shift, and go to state 151
-
-
-state 129
-
-   62 relation_expr: NOT "(" bool_expr . ")"
-
-    ")"  shift, and go to state 152
-
-
-state 130
-
-   59 relation_expr: NOT expr comp . expr
-
-    "-"     shift, and go to state 61
-    "("     shift, and go to state 118
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var        go to state 67
-    expr       go to state 153
-    mult_expr  go to state 72
-    term       go to state 73
-
-
-state 131
-
-   66 relation_expr: "(" bool_expr ")" .
-
-    $default  reduce using rule 66 (relation_expr)
-
-
-state 132
-
-   86 term: "(" expr ")" .
-
-    $default  reduce using rule 86 (term)
-
-
 state 133
 
-   49 if_body: stmt_loop . ELSEIF bool_expr elseif_body
-   50        | stmt_loop . ELSE stmt_loop
-   51        | stmt_loop .
+   83 expr: expr . "+" mult_expr
+   84     | expr . "-" mult_expr
+   94 term: "(" expr . ")"
 
-    ELSE    shift, and go to state 154
-    ELSEIF  shift, and go to state 155
-
-    $default  reduce using rule 51 (if_body)
+    "+"  shift, and go to state 111
+    "-"  shift, and go to state 112
+    ")"  shift, and go to state 139
 
 
 state 134
 
-   33 statement: IF bool_expr then if_body . ENDIF
+   53 var: IDENT "[" expr "]" .
 
-    ENDIF  shift, and go to state 156
+    $default  reduce using rule 53 (var)
 
 
 state 135
 
-   56 bool_expr: relation_and_expr OR bool_expr .
+   83 expr: expr . "+" mult_expr
+   84     | expr . "-" mult_expr
+   91 term: "-" "(" expr . ")"
 
-    $default  reduce using rule 56 (bool_expr)
+    "+"  shift, and go to state 111
+    "-"  shift, and go to state 112
+    ")"  shift, and go to state 155
 
 
 state 136
 
-   58 relation_and_expr: relation_expr AND relation_and_expr .
+   70 relation_expr: NOT "(" bool_expr . ")"
 
-    $default  reduce using rule 58 (relation_and_expr)
+    ")"  shift, and go to state 156
 
 
 state 137
 
-   75 expr: expr "+" mult_expr .
-   77 mult_expr: mult_expr . "*" term
-   78          | mult_expr . "/" term
-   79          | mult_expr . "%" term
+   67 relation_expr: NOT expr comp . expr
 
-    "*"  shift, and go to state 112
-    "/"  shift, and go to state 113
-    "%"  shift, and go to state 114
+    "-"     shift, and go to state 69
+    "("     shift, and go to state 94
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
 
-    $default  reduce using rule 75 (expr)
+    var        go to state 75
+    expr       go to state 157
+    mult_expr  go to state 80
+    term       go to state 81
 
 
 state 138
 
-   76 expr: expr "-" mult_expr .
-   77 mult_expr: mult_expr . "*" term
-   78          | mult_expr . "/" term
-   79          | mult_expr . "%" term
+   74 relation_expr: "(" bool_expr ")" .
 
-    "*"  shift, and go to state 112
-    "/"  shift, and go to state 113
-    "%"  shift, and go to state 114
-
-    $default  reduce using rule 76 (expr)
+    $default  reduce using rule 74 (relation_expr)
 
 
 state 139
 
-   63 relation_expr: expr comp expr .
-   75 expr: expr . "+" mult_expr
-   76     | expr . "-" mult_expr
+   94 term: "(" expr ")" .
 
-    "+"  shift, and go to state 103
-    "-"  shift, and go to state 104
-
-    $default  reduce using rule 63 (relation_expr)
+    $default  reduce using rule 94 (term)
 
 
 state 140
 
-   77 mult_expr: mult_expr "*" term .
+   34 statement: iWHILE bool_expr iBEGINLOOP stmt_loop . ENDLOOP
 
-    $default  reduce using rule 77 (mult_expr)
+    ENDLOOP  shift, and go to state 158
 
 
 state 141
 
-   78 mult_expr: mult_expr "/" term .
+   64 bool_expr: relation_and_expr OR bool_expr .
 
-    $default  reduce using rule 78 (mult_expr)
+    $default  reduce using rule 64 (bool_expr)
 
 
 state 142
 
-   79 mult_expr: mult_expr "%" term .
+   66 relation_and_expr: relation_expr AND relation_and_expr .
 
-    $default  reduce using rule 79 (mult_expr)
+    $default  reduce using rule 66 (relation_and_expr)
 
 
 state 143
 
-   34 statement: WHILE bool_expr BEGINLOOP stmt_loop . ENDLOOP
+   83 expr: expr "+" mult_expr .
+   85 mult_expr: mult_expr . "*" term
+   86          | mult_expr . "/" term
+   87          | mult_expr . "%" term
 
-    ENDLOOP  shift, and go to state 157
+    "*"  shift, and go to state 120
+    "/"  shift, and go to state 121
+    "%"  shift, and go to state 122
+
+    $default  reduce using rule 83 (expr)
 
 
 state 144
 
-   35 statement: DO BEGINLOOP stmt_loop ENDLOOP . WHILE bool_expr
+   84 expr: expr "-" mult_expr .
+   85 mult_expr: mult_expr . "*" term
+   86          | mult_expr . "/" term
+   87          | mult_expr . "%" term
 
-    WHILE  shift, and go to state 158
+    "*"  shift, and go to state 120
+    "/"  shift, and go to state 121
+    "%"  shift, and go to state 122
+
+    $default  reduce using rule 84 (expr)
 
 
 state 145
 
-   43 var_loop: var "," var_loop .
+   71 relation_expr: expr comp expr .
+   83 expr: expr . "+" mult_expr
+   84     | expr . "-" mult_expr
 
-    $default  reduce using rule 43 (var_loop)
+    "+"  shift, and go to state 111
+    "-"  shift, and go to state 112
+
+    $default  reduce using rule 71 (relation_expr)
 
 
 state 146
 
-   75 expr: expr . "+" mult_expr
-   76     | expr . "-" mult_expr
-   86 term: "(" expr . ")"
+   85 mult_expr: mult_expr "*" term .
 
-    "+"  shift, and go to state 103
-    "-"  shift, and go to state 104
-    ")"  shift, and go to state 132
+    $default  reduce using rule 85 (mult_expr)
 
 
 state 147
 
-   46 var: IDENT "[" expr "]" .
+   86 mult_expr: mult_expr "/" term .
 
-    $default  reduce using rule 46 (var)
+    $default  reduce using rule 86 (mult_expr)
 
 
 state 148
 
-   32 statement: var assign bool_expr "?" . expr ":" expr
+   87 mult_expr: mult_expr "%" term .
 
-    "-"     shift, and go to state 61
-    "("     shift, and go to state 118
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var        go to state 67
-    expr       go to state 159
-    mult_expr  go to state 72
-    term       go to state 73
+    $default  reduce using rule 87 (mult_expr)
 
 
 state 149
+
+   35 statement: iDO BEGINLOOP stmt_loop ENDLOOP . WHILE bool_expr
+
+    WHILE  shift, and go to state 159
+
+
+state 150
+
+   49 var_loop: var iCOMMA var_loop .
+
+    $default  reduce using rule 49 (var_loop)
+
+
+state 151
+
+   32 statement: var assign bool_expr "?" . expr ":" expr
+
+    "-"     shift, and go to state 69
+    "("     shift, and go to state 94
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var        go to state 75
+    expr       go to state 160
+    mult_expr  go to state 80
+    term       go to state 81
+
+
+state 152
+
+   33 statement: if_ bool_expr middle THEN . if_body ENDIF
+
+    IF        shift, and go to state 39
+    WHILE     shift, and go to state 40
+    DO        shift, and go to state 41
+    BREAK     shift, and go to state 42
+    CONTINUE  shift, and go to state 43
+    EXIT      shift, and go to state 44
+    READ      shift, and go to state 45
+    WRITE     shift, and go to state 46
+    IDENT     shift, and go to state 47
+
+    stmt_loop  go to state 161
+    statement  go to state 49
+    iWHILE     go to state 50
+    iDO        go to state 51
+    iREAD      go to state 52
+    iWRITE     go to state 53
+    var        go to state 54
+    if_        go to state 55
+    if_body    go to state 162
+
+
+state 153
 
    29 array_decl: ARRAY "[" NUMBER "]" error .
 
     $default  reduce using rule 29 (array_decl)
 
 
-state 150
+state 154
 
    24 array_decl: ARRAY "[" NUMBER "]" OF .
 
     $default  reduce using rule 24 (array_decl)
 
 
-state 151
-
-   83 term: "-" "(" expr ")" .
-
-    $default  reduce using rule 83 (term)
-
-
-state 152
-
-   62 relation_expr: NOT "(" bool_expr ")" .
-
-    $default  reduce using rule 62 (relation_expr)
-
-
-state 153
-
-   59 relation_expr: NOT expr comp expr .
-   75 expr: expr . "+" mult_expr
-   76     | expr . "-" mult_expr
-
-    "+"  shift, and go to state 103
-    "-"  shift, and go to state 104
-
-    $default  reduce using rule 59 (relation_expr)
-
-
-state 154
-
-   50 if_body: stmt_loop ELSE . stmt_loop
-
-    IF        shift, and go to state 39
-    WHILE     shift, and go to state 40
-    DO        shift, and go to state 41
-    BREAK     shift, and go to state 42
-    CONTINUE  shift, and go to state 43
-    EXIT      shift, and go to state 44
-    READ      shift, and go to state 45
-    WRITE     shift, and go to state 46
-    IDENT     shift, and go to state 47
-
-    stmt_loop  go to state 160
-    statement  go to state 49
-    var        go to state 50
-
-
 state 155
 
-   49 if_body: stmt_loop ELSEIF . bool_expr elseif_body
+   91 term: "-" "(" expr ")" .
 
-    error   shift, and go to state 60
-    "-"     shift, and go to state 61
-    NOT     shift, and go to state 62
-    TRUE    shift, and go to state 63
-    FALSE   shift, and go to state 64
-    "("     shift, and go to state 65
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var                go to state 67
-    bool_expr          go to state 161
-    relation_and_expr  go to state 69
-    relation_expr      go to state 70
-    expr               go to state 71
-    mult_expr          go to state 72
-    term               go to state 73
+    $default  reduce using rule 91 (term)
 
 
 state 156
 
-   33 statement: IF bool_expr then if_body ENDIF .
+   70 relation_expr: NOT "(" bool_expr ")" .
 
-    $default  reduce using rule 33 (statement)
+    $default  reduce using rule 70 (relation_expr)
 
 
 state 157
 
-   34 statement: WHILE bool_expr BEGINLOOP stmt_loop ENDLOOP .
+   67 relation_expr: NOT expr comp expr .
+   83 expr: expr . "+" mult_expr
+   84     | expr . "-" mult_expr
 
-    $default  reduce using rule 34 (statement)
+    "+"  shift, and go to state 111
+    "-"  shift, and go to state 112
+
+    $default  reduce using rule 67 (relation_expr)
 
 
 state 158
 
-   35 statement: DO BEGINLOOP stmt_loop ENDLOOP WHILE . bool_expr
+   34 statement: iWHILE bool_expr iBEGINLOOP stmt_loop ENDLOOP .
 
-    error   shift, and go to state 60
-    "-"     shift, and go to state 61
-    NOT     shift, and go to state 62
-    TRUE    shift, and go to state 63
-    FALSE   shift, and go to state 64
-    "("     shift, and go to state 65
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var                go to state 67
-    bool_expr          go to state 162
-    relation_and_expr  go to state 69
-    relation_expr      go to state 70
-    expr               go to state 71
-    mult_expr          go to state 72
-    term               go to state 73
+    $default  reduce using rule 34 (statement)
 
 
 state 159
 
-   32 statement: var assign bool_expr "?" expr . ":" expr
-   75 expr: expr . "+" mult_expr
-   76     | expr . "-" mult_expr
+   35 statement: iDO BEGINLOOP stmt_loop ENDLOOP WHILE . bool_expr
 
-    "+"  shift, and go to state 103
-    "-"  shift, and go to state 104
-    ":"  shift, and go to state 163
+    error   shift, and go to state 68
+    "-"     shift, and go to state 69
+    NOT     shift, and go to state 70
+    TRUE    shift, and go to state 71
+    FALSE   shift, and go to state 72
+    "("     shift, and go to state 73
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var                go to state 75
+    bool_expr          go to state 163
+    relation_and_expr  go to state 77
+    relation_expr      go to state 78
+    expr               go to state 79
+    mult_expr          go to state 80
+    term               go to state 81
 
 
 state 160
 
-   50 if_body: stmt_loop ELSE stmt_loop .
+   32 statement: var assign bool_expr "?" expr . ":" expr
+   83 expr: expr . "+" mult_expr
+   84     | expr . "-" mult_expr
 
-    $default  reduce using rule 50 (if_body)
+    "+"  shift, and go to state 111
+    "-"  shift, and go to state 112
+    ":"  shift, and go to state 164
 
 
 state 161
 
-   49 if_body: stmt_loop ELSEIF bool_expr . elseif_body
+   55 if_body: stmt_loop . elseif_ bool_expr middle elseif_body
+   56        | stmt_loop . else_ stmt_loop
+   57        | stmt_loop .
 
-    IF        shift, and go to state 39
-    WHILE     shift, and go to state 40
-    DO        shift, and go to state 41
-    BREAK     shift, and go to state 42
-    CONTINUE  shift, and go to state 43
-    EXIT      shift, and go to state 44
-    READ      shift, and go to state 45
-    WRITE     shift, and go to state 46
-    IDENT     shift, and go to state 47
+    ELSE    shift, and go to state 165
+    ELSEIF  shift, and go to state 166
 
-    stmt_loop    go to state 164
-    statement    go to state 49
-    var          go to state 50
-    elseif_body  go to state 165
+    $default  reduce using rule 57 (if_body)
+
+    elseif_  go to state 167
+    else_    go to state 168
 
 
 state 162
 
-   35 statement: DO BEGINLOOP stmt_loop ENDLOOP WHILE bool_expr .
+   33 statement: if_ bool_expr middle THEN if_body . ENDIF
 
-    $default  reduce using rule 35 (statement)
+    ENDIF  shift, and go to state 169
 
 
 state 163
 
-   32 statement: var assign bool_expr "?" expr ":" . expr
+   35 statement: iDO BEGINLOOP stmt_loop ENDLOOP WHILE bool_expr .
 
-    "-"     shift, and go to state 61
-    "("     shift, and go to state 118
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var        go to state 67
-    expr       go to state 166
-    mult_expr  go to state 72
-    term       go to state 73
+    $default  reduce using rule 35 (statement)
 
 
 state 164
 
-   52 elseif_body: stmt_loop . ELSEIF bool_expr elseif_body
-   53            | stmt_loop . ELSE stmt_loop
-   54            | stmt_loop .
+   32 statement: var assign bool_expr "?" expr ":" . expr
 
-    ELSE    shift, and go to state 167
-    ELSEIF  shift, and go to state 168
+    "-"     shift, and go to state 69
+    "("     shift, and go to state 94
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
 
-    $default  reduce using rule 54 (elseif_body)
+    var        go to state 75
+    expr       go to state 170
+    mult_expr  go to state 80
+    term       go to state 81
 
 
 state 165
 
-   49 if_body: stmt_loop ELSEIF bool_expr elseif_body .
+   62 else_: ELSE .
 
-    $default  reduce using rule 49 (if_body)
+    $default  reduce using rule 62 (else_)
 
 
 state 166
 
-   32 statement: var assign bool_expr "?" expr ":" expr .
-   75 expr: expr . "+" mult_expr
-   76     | expr . "-" mult_expr
+   58 elseif_: ELSEIF .
 
-    "+"  shift, and go to state 103
-    "-"  shift, and go to state 104
-
-    $default  reduce using rule 32 (statement)
+    $default  reduce using rule 58 (elseif_)
 
 
 state 167
 
-   53 elseif_body: stmt_loop ELSE . stmt_loop
+   55 if_body: stmt_loop elseif_ . bool_expr middle elseif_body
 
-    IF        shift, and go to state 39
-    WHILE     shift, and go to state 40
-    DO        shift, and go to state 41
-    BREAK     shift, and go to state 42
-    CONTINUE  shift, and go to state 43
-    EXIT      shift, and go to state 44
-    READ      shift, and go to state 45
-    WRITE     shift, and go to state 46
-    IDENT     shift, and go to state 47
+    error   shift, and go to state 68
+    "-"     shift, and go to state 69
+    NOT     shift, and go to state 70
+    TRUE    shift, and go to state 71
+    FALSE   shift, and go to state 72
+    "("     shift, and go to state 73
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
 
-    stmt_loop  go to state 169
-    statement  go to state 49
-    var        go to state 50
+    var                go to state 75
+    bool_expr          go to state 171
+    relation_and_expr  go to state 77
+    relation_expr      go to state 78
+    expr               go to state 79
+    mult_expr          go to state 80
+    term               go to state 81
 
 
 state 168
 
-   52 elseif_body: stmt_loop ELSEIF . bool_expr elseif_body
-
-    error   shift, and go to state 60
-    "-"     shift, and go to state 61
-    NOT     shift, and go to state 62
-    TRUE    shift, and go to state 63
-    FALSE   shift, and go to state 64
-    "("     shift, and go to state 65
-    IDENT   shift, and go to state 47
-    NUMBER  shift, and go to state 66
-
-    var                go to state 67
-    bool_expr          go to state 170
-    relation_and_expr  go to state 69
-    relation_expr      go to state 70
-    expr               go to state 71
-    mult_expr          go to state 72
-    term               go to state 73
-
-
-state 169
-
-   53 elseif_body: stmt_loop ELSE stmt_loop .
-
-    $default  reduce using rule 53 (elseif_body)
-
-
-state 170
-
-   52 elseif_body: stmt_loop ELSEIF bool_expr . elseif_body
+   56 if_body: stmt_loop else_ . stmt_loop
 
     IF        shift, and go to state 39
     WHILE     shift, and go to state 40
@@ -2063,14 +2063,187 @@ state 170
     WRITE     shift, and go to state 46
     IDENT     shift, and go to state 47
 
-    stmt_loop    go to state 164
-    statement    go to state 49
-    var          go to state 50
-    elseif_body  go to state 171
+    stmt_loop  go to state 172
+    statement  go to state 49
+    iWHILE     go to state 50
+    iDO        go to state 51
+    iREAD      go to state 52
+    iWRITE     go to state 53
+    var        go to state 54
+    if_        go to state 55
+
+
+state 169
+
+   33 statement: if_ bool_expr middle THEN if_body ENDIF .
+
+    $default  reduce using rule 33 (statement)
+
+
+state 170
+
+   32 statement: var assign bool_expr "?" expr ":" expr .
+   83 expr: expr . "+" mult_expr
+   84     | expr . "-" mult_expr
+
+    "+"  shift, and go to state 111
+    "-"  shift, and go to state 112
+
+    $default  reduce using rule 32 (statement)
 
 
 state 171
 
-   52 elseif_body: stmt_loop ELSEIF bool_expr elseif_body .
+   55 if_body: stmt_loop elseif_ bool_expr . middle elseif_body
 
-    $default  reduce using rule 52 (elseif_body)
+    $default  reduce using rule 41 (middle)
+
+    middle  go to state 173
+
+
+state 172
+
+   56 if_body: stmt_loop else_ stmt_loop .
+
+    $default  reduce using rule 56 (if_body)
+
+
+state 173
+
+   55 if_body: stmt_loop elseif_ bool_expr middle . elseif_body
+
+    IF        shift, and go to state 39
+    WHILE     shift, and go to state 40
+    DO        shift, and go to state 41
+    BREAK     shift, and go to state 42
+    CONTINUE  shift, and go to state 43
+    EXIT      shift, and go to state 44
+    READ      shift, and go to state 45
+    WRITE     shift, and go to state 46
+    IDENT     shift, and go to state 47
+
+    stmt_loop    go to state 174
+    statement    go to state 49
+    iWHILE       go to state 50
+    iDO          go to state 51
+    iREAD        go to state 52
+    iWRITE       go to state 53
+    var          go to state 54
+    if_          go to state 55
+    elseif_body  go to state 175
+
+
+state 174
+
+   59 elseif_body: stmt_loop . elseif_ bool_expr middle elseif_body
+   60            | stmt_loop . else_ stmt_loop
+   61            | stmt_loop .
+
+    ELSE    shift, and go to state 165
+    ELSEIF  shift, and go to state 166
+
+    $default  reduce using rule 61 (elseif_body)
+
+    elseif_  go to state 176
+    else_    go to state 177
+
+
+state 175
+
+   55 if_body: stmt_loop elseif_ bool_expr middle elseif_body .
+
+    $default  reduce using rule 55 (if_body)
+
+
+state 176
+
+   59 elseif_body: stmt_loop elseif_ . bool_expr middle elseif_body
+
+    error   shift, and go to state 68
+    "-"     shift, and go to state 69
+    NOT     shift, and go to state 70
+    TRUE    shift, and go to state 71
+    FALSE   shift, and go to state 72
+    "("     shift, and go to state 73
+    IDENT   shift, and go to state 47
+    NUMBER  shift, and go to state 74
+
+    var                go to state 75
+    bool_expr          go to state 178
+    relation_and_expr  go to state 77
+    relation_expr      go to state 78
+    expr               go to state 79
+    mult_expr          go to state 80
+    term               go to state 81
+
+
+state 177
+
+   60 elseif_body: stmt_loop else_ . stmt_loop
+
+    IF        shift, and go to state 39
+    WHILE     shift, and go to state 40
+    DO        shift, and go to state 41
+    BREAK     shift, and go to state 42
+    CONTINUE  shift, and go to state 43
+    EXIT      shift, and go to state 44
+    READ      shift, and go to state 45
+    WRITE     shift, and go to state 46
+    IDENT     shift, and go to state 47
+
+    stmt_loop  go to state 179
+    statement  go to state 49
+    iWHILE     go to state 50
+    iDO        go to state 51
+    iREAD      go to state 52
+    iWRITE     go to state 53
+    var        go to state 54
+    if_        go to state 55
+
+
+state 178
+
+   59 elseif_body: stmt_loop elseif_ bool_expr . middle elseif_body
+
+    $default  reduce using rule 41 (middle)
+
+    middle  go to state 180
+
+
+state 179
+
+   60 elseif_body: stmt_loop else_ stmt_loop .
+
+    $default  reduce using rule 60 (elseif_body)
+
+
+state 180
+
+   59 elseif_body: stmt_loop elseif_ bool_expr middle . elseif_body
+
+    IF        shift, and go to state 39
+    WHILE     shift, and go to state 40
+    DO        shift, and go to state 41
+    BREAK     shift, and go to state 42
+    CONTINUE  shift, and go to state 43
+    EXIT      shift, and go to state 44
+    READ      shift, and go to state 45
+    WRITE     shift, and go to state 46
+    IDENT     shift, and go to state 47
+
+    stmt_loop    go to state 174
+    statement    go to state 49
+    iWHILE       go to state 50
+    iDO          go to state 51
+    iREAD        go to state 52
+    iWRITE       go to state 53
+    var          go to state 54
+    if_          go to state 55
+    elseif_body  go to state 181
+
+
+state 181
+
+   59 elseif_body: stmt_loop elseif_ bool_expr middle elseif_body .
+
+    $default  reduce using rule 59 (elseif_body)

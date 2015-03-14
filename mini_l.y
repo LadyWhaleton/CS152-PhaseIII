@@ -23,14 +23,17 @@ map <string, int> symbol_table;
 vector <string> ident_list;
 vector<string> leader_list;
 int label_ctr, temp_ctr, pred_ctr  = 0;
+string tempName;
+string tempVarName;
+bool readFlag = false;
+bool if_flag = false;//if you encounter an if statement, then you don't push the bool expression code onto milcode.
 
 bool errorFound = false;
 bool isArrayAccess = false;
-bool boolval = true;
-bool skipCode = false;
 int booleanOp = 0;
 int iLeader = 0;
 list<string> milcode;
+list<string> tempCode;
 
 string newTemp();
 string newPred ();
@@ -50,11 +53,8 @@ enum IDENT_TYPE
 	TYPE_ARRAY = 1
 };
    
-	
 
 %}
-
-
 
 /*Bison Declarations*/
 %union{
@@ -76,7 +76,6 @@ enum IDENT_TYPE
    struct attribute myAttri; 
 }
 
-%error-verbose
 %start S
 %token PLUS "+" SUB "-" MULT "*" DIV "/"  MOD "%" EQUAL "="
 %token PROGRAM
@@ -168,8 +167,8 @@ decl_loop:  declaration SEMICOLON decl_loop
 	    | declaration error 
         ;
         
-stmt_loop:  statement SEMICOLON stmt_loop { $$.code = $1.code; }
-	    | statement SEMICOLON { $$.code = $1.code; }
+stmt_loop:  statement SEMICOLON stmt_loop { }
+	    | statement SEMICOLON { }
 	    | statement error stmt_loop 
 	    | statement error
         ;
@@ -256,20 +255,23 @@ array_decl: 	/*empty */ { $$.type = TYPE_INT; }
 /* var assign var_branch {$$.code = "hi"} */
 statement:	var assign expr 
 			{
-                if(!skipCode) {
-		    		string varName = $1.name;
-	    			string exprName = $3.name;
-			    	//if variable is not in the symbol table, then this will
-    				//immediately create the variable and assign value, which
-	    			//is bad.
-		    		symbol_table[varName] = $3.value;
-				
-			    	string newCode = "\t= " + varName + ", " + exprName;
-    				milcode.push_back (newCode);
-                }
-                else {
-                    cout << "var ASSIGN expr skipped\n";
-                }
+
+		    	string varName = $1.name;
+	    		string exprName = $3.name;
+			    //if variable is not in the symbol table, then this will
+    			//immediately create the variable and assign value, which
+	    		//is bad.
+		    	symbol_table[varName] = $3.value;
+			  	
+			string newCode = "\t= " + varName + ", " + exprName;
+			/*if(!if_flag)
+	    			milcode.push_back (newCode);		
+			else
+				tempCode.push_back(newCode);
+			*/
+			milcode.push_back(newCode);	
+
+                
 			} 
 			| var assign bool_expr QUESTION expr COLON expr
 			{
@@ -279,74 +281,156 @@ statement:	var assign expr
 				string expr1Name = $5.name;
 				string expr2Name = $7.name;
 				string newCode = "";
-				if(boolval) {
-					newCode = "\t= " + varName + ", " + expr1Name;
-					milcode.push_back (newCode);
-                   				}
-				else {
-				    newCode = "\t= " + varName + ", " + expr2Name;
-					milcode.push_back (newCode);
-				}
-              //  $$.code = (char*) newCode.c_str();
-
-                
+				
+				newCode = "\t= " + varName + ", " + expr1Name;
+			/*	if(!if_flag)
+	    				milcode.push_back (newCode);		
+				else
+					tempCode.push_back(newCode);
+                   	*/
+			milcode.push_back(newCode);			
+				newCode = "\t= " + varName + ", " + expr2Name;
+			/*	
+				if(!if_flag)
+	    				milcode.push_back (newCode);		
+				else
+					tempCode.push_back(newCode);
+                */
+			milcode.push_back(newCode);
 			}
-         	| IF bool_expr then if_body ENDIF
-         	{
-				string boolExprName = $2.name;
-				if(!boolval)
-                {
+         	| if_ bool_expr middle THEN if_body ENDIF
+         	{	
+			string label = " : " + leader_list.back();
+			leader_list.pop_back();
+			string boolExprName = $2.name;
+
+			milcode.push_back(label);
+		}
+         	| iWHILE bool_expr iBEGINLOOP stmt_loop ENDLOOP
+           	{
+			/*
+			string predName = newPred();
+			string newCode = "\t! " + predName + ", " + $2.name;
+			
+			
                 	string labelName = newLabel();
-					leader_list.pop_back();
-					string newCode = " := " + labelName; 
-					milcode.push_back (newCode);
-				}
-                else
-                {
-                    if($4.code == NULL || $4.code == "")
-                    {
-                        cout << "newCode is null\n";
-                    }
-                    else
-                    {
-                        string newCode = $4.code;
-                        milcode.push_back(newCode); 
-                    }
-                }
-                skipCode = false;
-                string newCode = " := " + newLabel();
-                milcode.push_back(newCode);
-         	}
-         	| WHILE bool_expr BEGINLOOP stmt_loop ENDLOOP
-            {
-                	string labelName = newLabel();
-					leader_list.push_back(labelName);
-					string newCode = " := " + labelName; 
-					milcode.push_back (newCode);
+			leader_list.push_back(labelName);
+			newCode = " := " + labelName; 
+			milcode.push_back (newCode);
+			*/
+			
+			/* save the end label before popback */
+			string endLabel = leader_list.back();
+			leader_list.pop_back();
+	
+
+			/*print goto statement */
+			string newCode = "\t:= " + leader_list.back();
+			milcode.push_back(newCode);
+			leader_list.pop_back();
+
+			newCode = " : " + endLabel;
+			milcode.push_back(newCode);
                 
-            }
-        	| DO BEGINLOOP stmt_loop ENDLOOP WHILE bool_expr {}
-         	| READ var_loop {}
-         	| WRITE var_loop {}
+            	}
+        	| iDO BEGINLOOP stmt_loop ENDLOOP WHILE bool_expr
+		{
+			string boolexprName = $6.name;
+			string label = leader_list.back();
+			leader_list.pop_back();
+
+			string newCode = "\t?:= " + label + ", " + boolexprName;
+			milcode.push_back(newCode);
+		}
+         	| iREAD var_loop {}
+         	| iWRITE var_loop {}
          	| BREAK {}
          	| CONTINUE {}
          	| EXIT 
-            {
-
-            }
+            	{
+			string newCode = "\t := EndLabel";
+			milcode.push_back (newCode);
+          	}
          	;
+middle: 	{	
+		string predName = newPred();
+		string label = leader_list.back();
+		string newCode = "\t! " + predName + ", " + tempName;
+		milcode.push_back(newCode);
+		newCode = "\t?:= " + label + ", " + predName;
+		milcode.push_back(newCode);
+		};
+
+iWHILE:	WHILE
+	{
+		/* generate the start label*/
+		string label = newLabel();
+		leader_list.push_back (label);
+		string newCode = " : " + label;
+		milcode.push_back (newCode);
+
+		/* generate the end label*/
+		label = newLabel();
+		leader_list.push_back (label);
+	}
+	;
+
+iBEGINLOOP: BEGINLOOP	
+	{
+		string label = leader_list.back();
+		string predName = newPred();
+		string newCode = "\t! " + predName + ", " + tempName;
+		milcode.push_back (newCode);
+
+		newCode = "\t:= " + label + ", " + predName;
+		milcode.push_back (newCode);
+		//leader_list.pop_back();
+		
+	}
+	;
+
+iDO:	DO
+	{
+		string label = newLabel();
+		leader_list.push_back(label);
+		string newCode = " : " + label;
+		milcode.push_back (newCode);
+	}
+	;
 
 assign: ASSIGN 
-		| error 
-/*		
-var_branch:     expr 
-                | bool_expr QUESTION expr COLON expr	
-                ;
-*/
+	| error 
+	;
+
+iREAD:  READ { readFlag = true; }
+	;
+iWRITE: WRITE { readFlag = false; }
+	;
          
-var_loop:   var COMMA var_loop 
-            | var 
-            ;         
+var_loop:   var iCOMMA var_loop 
+            | var
+	    {
+		string varName = $1.name;
+		string newCode;
+
+		if (readFlag)
+			newCode = "\t.< " + varName;
+		else
+			newCode = "\t.> " + varName;
+		milcode.push_back (newCode);
+	    } 
+            ;
+iCOMMA:	COMMA
+	{
+		string newCode;
+		
+		if (readFlag)
+			newCode = "\t.< " + tempVarName;
+		else
+			newCode = "\t.> " + tempVarName;
+		milcode.push_back (newCode); 
+	}
+	;
                 
 var:    IDENT 
 		{
@@ -365,6 +449,7 @@ var:    IDENT
 				$$.value = temp;
 			}
 			strcpy ($$.name, $1);
+			tempVarName = $1;
           
 		}
 		
@@ -375,55 +460,84 @@ var:    IDENT
 			*/	
         } 
         ;
+if_:	IF {string label = newLabel();
+	    leader_list.push_back(label);
+	    if_flag = true;
+	}
+	;
 
-then:   THEN {
-                if(!boolval) {
-                    skipCode = true;
-                }
-                else {
-                    skipCode = false;
-                    string labelName = newLabel();
-                    leader_list.push_back(labelName);
-                    //milcode.push_back(" " + labelName);
-                }
-             }
-            
-        | error
-        ;
+if_body:    stmt_loop elseif_ bool_expr middle elseif_body
+	    {
+		string label = leader_list.back();
+		if(!leader_list.empty()) {
+			leader_list.pop_back();
+		}
+		/*
+		string bool_exprName = $3.name;
+		string predName = newPred();
+		string newCode = "\t! " + predName + ", " + bool_exprName;
+		milcode.push_back(newCode);
+		newCode = "\t?:= " + label + ", " + predName;
+		milcode.push_back(newCode);*/
 
-if_body:    stmt_loop ELSEIF bool_expr elseif_body
-            | stmt_loop ELSE stmt_loop   
-            | stmt_loop
-            {
-                if(boolval) {
-                    cout << "if_body.boolval = true\n";
-                    if($1.code == NULL || $1.code == "") { 
-
-                        cout << "if_body.code is null\n";               
-                    }
-                    else
-                    { 
-                        string newCode = $1.code;
-                        cout << newCode + "\n";
-                        milcode.push_back(newCode);
-                        $$.code = $1.code;
-                    }
-                }
+	//	milcode.push_back (" : " + label);
             }
-            ;
+            | stmt_loop else_ stmt_loop
+	    {
+		if(leader_list.empty()) {
+		cout << "stmt_loop else_stmt_loop: List empy\n";
+		}
+		else
+			leader_list.pop_back();
+	    }
+            | stmt_loop
+            ;	    
 
-elseif_body:    stmt_loop ELSEIF bool_expr elseif_body
-                | stmt_loop ELSE stmt_loop 
-                | stmt_loop 
+elseif_:  ELSEIF { string label = newLabel(); leader_list.push_back(label); milcode.push_back(" : " + label);}
+	  ;
+elseif_body:    stmt_loop elseif_ bool_expr middle elseif_body
+                | stmt_loop else_ stmt_loop
+	{
+		if(leader_list.empty()) {
+		cout << "stmt_loop else_stmt_loop: List empy\n";
+		}
+		else
+			leader_list.pop_back();
+		}
+                | stmt_loop
                 ;
+else_: ELSE { leader_list.back();  }
 
-
-bool_expr:	relation_and_expr {}
-			| relation_and_expr OR bool_expr {}
+bool_expr:	relation_and_expr 
+		{
+			strcpy($$.name, $1.name);
+			tempName = $1.name;
+		}
+		| relation_and_expr OR bool_expr
+		{
+			string predLHSName = $1.name;
+			string predRHSName = $3.name;
+			string predName = newPred();
+			string newCode = genExprCode (predName, predLHSName, predRHSName, "||");
+			milcode.push_back(newCode);
+			strcpy($$.name, predName.c_str());
+			tempName = predName;
+		}
            	;
 
-relation_and_expr: 	relation_expr {}	
-					| relation_expr AND relation_and_expr {}
+relation_and_expr: 	relation_expr 
+			{
+				strcpy($$.name, $1.name);
+			}	
+			| relation_expr AND relation_and_expr
+			{
+				string predLHSName = $1.name;
+				string predRHSName = $3.name;
+				string predName = newPred();
+				string newCode = genExprCode (predName, predLHSName, predRHSName, "&&");
+				milcode.push_back(newCode);
+				strcpy($$.name, predName.c_str());
+			}
                     ;
 
 relation_expr:	NOT expr comp expr 
@@ -452,7 +566,6 @@ relation_expr:	NOT expr comp expr
 					string predName = newPred();
 					strcpy ($$.name, predName.c_str());
 					
-					boolval = false;
 					// ! dest, src
 					string newCode = "\t! " + predName + ", true";
 					milcode.push_back (newCode);
@@ -465,7 +578,6 @@ relation_expr:	NOT expr comp expr
 					string predName = newPred();
 					strcpy ($$.name, predName.c_str());
 					
-					boolval = true;
 					// ! dest, src
 					string newCode = "\t! " + predName + ", false";
 					milcode.push_back (newCode);
@@ -473,8 +585,6 @@ relation_expr:	NOT expr comp expr
 				}
 				| NOT L_PAREN bool_expr R_PAREN 
 				{
-					// need to implement comparator stuff
-				
 					string boolexpr_name = $3.name;
 					string predName = newPred();
 					strcpy ($$.name, predName.c_str());
@@ -484,21 +594,17 @@ relation_expr:	NOT expr comp expr
 				}
 				| expr comp expr 
 				{
-					// need to implement comparator stuff
-					
 					string bool_op = $2.name;
 					
 					string predName = newPred();
 					strcpy ($$.name, predName.c_str());
 					
-					boolval = compare($1.value, $3.value, booleanOp);
-
 					string newCode = genExprCode(predName, $1.name, $3.name, bool_op);
 					milcode.push_back (newCode);	
 				}
-				| TRUE { string temp = "true"; strcpy($$.name, temp.c_str()); boolval = true;}
-				| FALSE { string temp = "false"; strcpy ($$.name, temp.c_str()); boolval = false;}
-				| L_PAREN bool_expr R_PAREN { strcpy ($$.name, $$.name); }
+				| TRUE { string temp = "true"; strcpy($$.name, temp.c_str());}
+				| FALSE { string temp = "false"; strcpy ($$.name, temp.c_str());}
+				| L_PAREN bool_expr R_PAREN { strcpy ($$.name, $2.name); }
 				| error { printf("Syntax Error: Invalid condition\n"); }
 				;
 
@@ -658,7 +764,7 @@ string newLabel ()
 {
 	stringstream ss;
 	ss << label_ctr;
-	string newLabelName = " L" + ss.str();
+	string newLabelName = "L" + ss.str();
 	label_ctr++;
 	
 	return newLabelName;
@@ -688,7 +794,11 @@ bool compare(int lhs, int rhs, int boolOp)
 			break;
 	}
 }
-
+void print () {
+	for(int i = 0; i < leader_list.size(); ++i) {
+		cout << leader_list[i] << endl;
+	}
+}
 
 int main() {
 
